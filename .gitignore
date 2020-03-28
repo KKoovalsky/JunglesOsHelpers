@@ -1,0 +1,7 @@
+# Vim related
+*.swp
+.clangd/
+
+# Build related
+build/
+compile_commands.json
