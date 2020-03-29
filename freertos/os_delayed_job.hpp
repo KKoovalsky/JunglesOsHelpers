@@ -76,7 +76,7 @@ class os_delayed_job : public os_delayed_job_interface
         auto tim{xTimerCreateStatic("os_delayed_job",
                                     pdMS_TO_TICKS(delay_ms),
                                     no_auto_reload,
-                                    &m_data, // Pass the proxy object to the timer callback
+                                    m_data.get(), // Pass the proxy object to the timer callback
                                     timer_callback,
                                     &m_data->m_timer_storage)};
         if (tim == nullptr) return os_error::creation_failed;
@@ -124,11 +124,11 @@ void os_delayed_job::timer_callback(TimerHandle_t tim)
     // The proxy class is passed as a void*, because this is how C allows you to do it only.
     // We capture the timer ID which was passed as the fourth argument to the xTimerCreateStatic function in the
     // start() function.
-    auto data_ptr{static_cast<std::shared_ptr<detail::os_delayed_job_data>*>(pvTimerGetTimerID(tim))};
+    auto data_ptr{static_cast<detail::os_delayed_job_data*>(pvTimerGetTimerID(tim))};
 
     // Will effectively create a shared_ptr, so we will increase the reference count to keep the object alive when
     // resetting m_ptr_to_myself in the next line.
-    auto data{*data_ptr};
+    auto data{data_ptr->m_ptr_to_myself};
     data->m_ptr_to_myself = nullptr;
 
     // Do the delayed job.
