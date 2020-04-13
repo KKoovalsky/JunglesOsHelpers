@@ -55,6 +55,11 @@ add_library(catch2 INTERFACE IMPORTED)
 add_dependencies(catch2 catch2_repo)
 target_include_directories(catch2 INTERFACE ${CATCH_ROOT_DIR}/include)
 
-add_executable(TestBuild test/freertos/main.cpp test/freertos/os_delayed_job_test.cpp)
+add_executable(TestBuild
+    test/freertos/main.cpp
+    test/freertos/os_delayed_job_test.cpp
+    test/freertos/test_thread_impl.cpp
+    test/generic/test_thread.cpp
+)
 include_directories(${CMAKE_SOURCE_DIR})
 target_link_libraries(TestBuild freertos_kernel catch2)
