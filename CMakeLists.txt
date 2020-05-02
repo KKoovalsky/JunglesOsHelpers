@@ -59,7 +59,9 @@ add_executable(TestBuild
     test/freertos/main.cpp
     test/freertos/os_delayed_job_test.cpp
     test/freertos/test_thread_impl.cpp
+    test/freertos/test_queue_impl.cpp
     test/generic/test_thread.cpp
+    test/generic/test_queue.cpp
 )
 include_directories(${CMAKE_SOURCE_DIR})
 target_link_libraries(TestBuild freertos_kernel catch2)

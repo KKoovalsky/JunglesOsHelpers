@@ -12,9 +12,11 @@ namespace jungles
 enum class os_error
 {
     ok = 0,
+    error,
     creation_failed,
     start_failed,
-    error
+    queue_full,
+    queue_empty
 };
 
 }
