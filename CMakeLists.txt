@@ -51,7 +51,7 @@ ExternalProject_Add(catch2_repo
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
     CMAKE_ARGS ${CATCH2_CMAKE_ARGS}
 )
-add_library(catch2 INTERFACE IMPORTED)
+add_library(catch2 INTERFACE)
 add_dependencies(catch2 catch2_repo)
 target_include_directories(catch2 INTERFACE ${CATCH_ROOT_DIR}/include)
 
