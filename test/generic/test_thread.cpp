@@ -9,62 +9,22 @@
 #include "thread.hpp"
 
 #include <algorithm>
-#include <condition_variable>
-#include <functional>
 #include <iostream>
 #include <memory>
-#include <mutex>
+
+#include "../test_helpers.hpp"
 
 using namespace jungles;
 
 //! Shall return thread implementation basing on the compilation target (for FreeRTOS or e.g. mbed).
 std::unique_ptr<thread> get_thread_for_test_run(std::function<void(void)>);
 
-struct flag
-{
-    std::mutex mux;
-    std::condition_variable cv;
-    bool finished{false};
-
-    void set()
-    {
-        {
-            std::lock_guard g{mux};
-            finished = true;
-        }
-        cv.notify_all();
-    }
-
-    void wait()
-    {
-        std::unique_lock lk{mux};
-        cv.wait(lk, [&] { return finished; });
-    }
-
-    bool is_set() const
-    {
-        return finished;
-    }
-};
-
-struct notify_on_destruction
-{
-    flag& f;
-
-    explicit notify_on_destruction(flag& f) : f{f} {}
-
-    ~notify_on_destruction()
-    {
-        f.set();
-    }
-};
-
-TEST_CASE("Thread is able to run a task", "[active]")
+TEST_CASE("Thread is able to run a task", "[thread]")
 {
     SECTION("Thread blocks, finishes and joins on destruction")
     {
-        flag thread_started_flag;
-        flag thread_shall_finish;
+        test_helpers::flag thread_started_flag;
+        test_helpers::flag thread_shall_finish;
 
         {
             auto t{get_thread_for_test_run([&]() {
@@ -72,7 +32,7 @@ TEST_CASE("Thread is able to run a task", "[active]")
                 thread_shall_finish.wait();
             })};
 
-            notify_on_destruction n{thread_shall_finish};
+            test_helpers::notify_on_destruction n{thread_shall_finish};
 
             thread_started_flag.wait();
         }
@@ -83,8 +43,8 @@ TEST_CASE("Thread is able to run a task", "[active]")
 
     SECTION("Thread continues to work after detaching")
     {
-        flag thread_destructed_flag;
-        flag thread_shall_set_this_flag_after_detach;
+        test_helpers::flag thread_destructed_flag;
+        test_helpers::flag thread_shall_set_this_flag_after_detach;
 
         {
             auto t{get_thread_for_test_run([&]() {
@@ -103,8 +63,8 @@ TEST_CASE("Thread is able to run a task", "[active]")
 
     SECTION("Thread blocks, finishes and joins on explicit call for joining")
     {
-        flag thread_started_flag;
-        flag thread_shall_finish;
+        test_helpers::flag thread_started_flag;
+        test_helpers::flag thread_shall_finish;
 
         {
             auto t{get_thread_for_test_run([&]() {
