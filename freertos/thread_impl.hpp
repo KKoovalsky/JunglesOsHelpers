@@ -46,6 +46,10 @@ class thread_impl : public thread
         // This is why the proxy object is initialized partially and its initialization is not performed within
         // the object itself.
 
+        // Make the cyclic reference to the proxy object. This will ensure that the proxy will still live when the
+        // "master" (thread_impl) object is destructed after detaching.
+        m_data->ptr_to_myself = m_data;
+
         auto handle{xTaskCreateStatic(task_fun,
                                       m_data->name.c_str(),
                                       StackSize,
@@ -56,9 +60,6 @@ class thread_impl : public thread
 
         assert(handle != nullptr);
 
-        // Make the cyclic reference to the proxy object. This will ensure that the proxy will still live when the
-        // "master" (thread_impl) object is destructed after detaching.
-        m_data->ptr_to_myself = m_data;
     }
 
     thread_impl(const thread_impl&) = delete;

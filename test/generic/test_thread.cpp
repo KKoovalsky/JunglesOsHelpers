@@ -91,9 +91,16 @@ TEST_CASE("Thread is able to run a task", "[thread]")
 
     SECTION("Can't detach after detach")
     {
-        auto t{get_thread_for_test_run([]() {})};
-        t->detach();
-        REQUIRE(t->detach() != os_error::ok);
+        // NOTE: this flag shouldn't be needed but I have found some erroneous behavior of the FreeRTOS port that
+        // it hangs sometimes when the thread created in the next SECTION is started before the thread created in
+        // this section.
+        test_helpers::flag thread_finished_flag;
+        {
+            auto t{get_thread_for_test_run([&]() { thread_finished_flag.set(); })};
+            t->detach();
+            REQUIRE(t->detach() != os_error::ok);
+        }
+        thread_finished_flag.wait();
     }
 
     SECTION("Can join multiple times")
