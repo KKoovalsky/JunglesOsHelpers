@@ -18,6 +18,8 @@
 #include <array>
 #include <tl/expected.hpp>
 
+#include <boost/container/static_vector.hpp>
+
 namespace jungles
 {
 
@@ -54,7 +56,7 @@ class queue_impl : public queue<ElementType, Size>
             is_full = queue_depot_elem_count == Size;
             if (!is_full)
             {
-                queue_depot[queue_depot_head] = std::move(elem);
+                queue_depot.insert(iterator_from_index(queue_depot_head), std::move(elem));
                 increment_circular_buffer_index(queue_depot_head);
                 ++queue_depot_elem_count;
             }
@@ -84,8 +86,13 @@ class queue_impl : public queue<ElementType, Size>
         index = (index + 1) % Size;
     }
 
+    auto iterator_from_index(unsigned index)
+    {
+        return std::next(std::begin(queue_depot), index);
+    }
+
     //! @todo Shall be circular buffer.
-    std::array<ElementType, Size> queue_depot;
+    boost::container::static_vector<ElementType, Size> queue_depot;
     unsigned queue_depot_tail{0}, queue_depot_head{0}, queue_depot_elem_count{0};
     SemaphoreHandle_t queue_depot_mux;
     SemaphoreHandle_t num_elements_counting_sem;
