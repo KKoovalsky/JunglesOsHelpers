@@ -7,6 +7,7 @@
 #define TEST_HELPERS_HPP
 
 #include <condition_variable>
+#include <functional>
 #include <mutex>
 
 namespace test_helpers
@@ -49,6 +50,13 @@ struct notify_on_destruction
     {
         f.set();
     }
+};
+
+struct message
+{
+    std::function<void(void)> callback;
+
+    explicit message(std::function<void(void)> callback) : callback{callback} {}
 };
 
 } // namespace test_helpers
