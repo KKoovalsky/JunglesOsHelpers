@@ -50,16 +50,14 @@ class thread_impl : public thread
         // "master" (thread_impl) object is destructed after detaching.
         m_data->ptr_to_myself = m_data;
 
-        auto handle{xTaskCreateStatic(task_fun,
-                                      m_data->name.c_str(),
-                                      StackSize,
-                                      m_data.get(), // Forward the proxy object to the task code.
-                                      priority,
-                                      m_data->stack_storage.data(),
-                                      &m_data->task_storage)};
+        auto result{xTaskCreate(task_fun,
+                                m_data->name.c_str(),
+                                StackSize,
+                                m_data.get(), // Forward the proxy object to the task code.
+                                priority,
+                                nullptr)};
 
-        assert(handle != nullptr);
-
+        assert(result == pdPASS);
     }
 
     thread_impl(const thread_impl&) = delete;
@@ -109,8 +107,6 @@ namespace detail
 template<std::size_t StackSize>
 struct thread_impl_proxy
 {
-    std::array<StackType_t, StackSize> stack_storage = {};
-    StaticTask_t task_storage = {};
     std::function<void(void)> thread_fun;
     std::string name;
     StaticSemaphore_t task_finished_sem_storage = {};
