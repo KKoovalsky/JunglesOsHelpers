@@ -44,7 +44,6 @@ struct os_delayed_job_data
         if (m_job_finished_sem != nullptr) { vSemaphoreDelete(m_job_finished_sem); }
     }
 
-    StaticTimer_t m_timer_storage = {};
     StaticSemaphore_t m_job_finished_sem_storage = {};
     std::function<void(void)> m_timeout_callback;
     std::shared_ptr<os_delayed_job_data> m_ptr_to_myself;
@@ -73,12 +72,11 @@ class os_delayed_job : public os_delayed_job_interface
         m_data->m_job_finished_sem = sem;
 
         auto no_auto_reload{pdFALSE};
-        auto tim{xTimerCreateStatic("os_delayed_job",
-                                    pdMS_TO_TICKS(delay_ms),
-                                    no_auto_reload,
-                                    m_data.get(), // Pass the proxy object to the timer callback
-                                    timer_callback,
-                                    &m_data->m_timer_storage)};
+        auto tim{xTimerCreate("os_delayed_job",
+                              pdMS_TO_TICKS(delay_ms),
+                              no_auto_reload,
+                              m_data.get(), // Pass the proxy object to the timer callback
+                              timer_callback)};
         if (tim == nullptr) return os_error::creation_failed;
         m_data->m_timer = tim;
 
