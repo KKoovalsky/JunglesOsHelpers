@@ -7,8 +7,6 @@
 #define ACTIVE_IMPL_GENERIC__HPP
 
 #include "active.hpp"
-#include "queue.hpp"
-#include "thread.hpp"
 
 #include <memory>
 #include <variant>
@@ -16,18 +14,33 @@
 namespace jungles
 {
 
-// TODO: C++20 - thread that has concept of specific interface, to not have typename Thread and extra unique_ptr?
-template<typename Message, typename Thread, typename Queue>
-class active_generic_impl : active<Message>
+template<typename Message, typename Thread, template<typename> typename MessagePump>
+class active_generic_impl : public active<Message>
 {
-    active_generic_impl(typename active<Message>::on_message_received_handler message_handler) :
-        active<Message>{message_handler},
-        message_pump{std::make_unique<Queue<MessageProxy>>()}, // TODO: test if that works?
-        worker_thread{std::make_unique<Thread>([this]() { this->thread_code(); })}
+  public:
+    active_generic_impl(const active_generic_impl&) = delete;
+    active_generic_impl& operator=(const active_generic_impl&) = delete;
+    active_generic_impl(active_generic_impl&&) = delete;
+    active_generic_impl& operator=(active_generic_impl&&) = delete;
 
+    active_generic_impl(typename active<Message>::on_message_received_handler message_handler) :
+        active<Message>{message_handler}, worker_thread{[this]() { this->thread_code(); }}
     {}
 
+    virtual os_error send(Message&& m) override
+    {
+        return message_pump.send({std::move(m)});
+    }
+
   private:
+    //! Used to inform the active that it shall exit and stop the thread loop
+    struct quit_message
+    {};
+    using MessageProxy = typename std::variant<Message, quit_message>;
+
+    MessagePump<MessageProxy> message_pump;
+    Thread worker_thread;
+
     void thread_code()
     {
         while (true)
@@ -45,14 +58,6 @@ class active_generic_impl : active<Message>
             this->m_message_handler(std::move(user_msg));
         }
     }
-
-    //! Used to inform the active that it shall exit and stop the thread loop
-    struct quit_message
-    {};
-    using MessageProxy = typename std::variant<Message, quit_message>;
-
-    std::unique_ptr<jungles::queue<MessageProxy>> message_pump;
-    std::unique_ptr<jungles::thread> worker_thread;
 };
 
 } // namespace jungles
