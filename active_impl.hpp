@@ -14,6 +14,13 @@
 namespace jungles
 {
 
+/**
+ * Active object implementation from "Prefer Using Active Objects Instead of Naked Threads" by Herb Sutter
+ * \tparam Message Type of message to be passed around.
+ * \tparam Thread Class that takes void(void) function in constructor and implements join() function (like std::thread)
+ * \tparam MessagePump shall implement jungles::queue interface.
+ * \todo This documentation shall be inside a C++20 concept.
+ */
 template<typename Message, typename Thread, template<typename> typename MessagePump>
 class active_generic_impl : public active<Message>
 {
