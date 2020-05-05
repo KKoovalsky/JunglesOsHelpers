@@ -15,16 +15,14 @@
 
 #include "../test_helpers.hpp"
 
-static constexpr unsigned queue_size{4};
-
 //! Shall return queue implementation basing on the compilation target (for FreeRTOS or e.g. mbed).
-std::unique_ptr<jungles::queue<unsigned, queue_size>> get_queue_for_test_run();
+std::unique_ptr<jungles::queue<unsigned>> get_queue_of_size_4_for_test_run();
 
 std::unique_ptr<jungles::thread> get_thread_for_test_run(std::function<void(void)>);
 
 TEST_CASE("Messages are received and sent to the queue", "[queue]")
 {
-    auto q{get_queue_for_test_run()};
+    auto q{get_queue_of_size_4_for_test_run()};
     SECTION("Few messages sent and received from queue")
     {
         SECTION("All messages sent and then received")

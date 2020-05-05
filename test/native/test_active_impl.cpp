@@ -18,7 +18,7 @@
 #include <thread>
 
 template<typename Message>
-class message_pump_mock : jungles::queue<Message, 16>
+class message_pump_mock : jungles::queue<Message>
 {
   public:
     virtual jungles::os_error send(Message&& m) override

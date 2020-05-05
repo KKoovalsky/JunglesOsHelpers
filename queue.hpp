@@ -15,7 +15,7 @@ namespace jungles
 {
 
 //! Thread-safe queue used to send messages.
-template<typename ElementType, std::size_t Size>
+template<typename ElementType>
 struct queue
 {
     /**

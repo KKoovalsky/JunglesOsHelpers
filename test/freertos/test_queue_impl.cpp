@@ -8,7 +8,7 @@
 
 #include <memory>
 
-std::unique_ptr<jungles::queue<unsigned, 4>> get_queue_for_test_run()
+std::unique_ptr<jungles::queue<unsigned>> get_queue_of_size_4_for_test_run()
 {
     return std::make_unique<jungles::queue_impl<unsigned, 4>>();
 }

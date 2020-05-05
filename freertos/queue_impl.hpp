@@ -24,7 +24,7 @@ namespace jungles
 {
 
 template<typename ElementType, std::size_t Size>
-class queue_impl : public queue<ElementType, Size>
+class queue_impl : public queue<ElementType>
 {
   public:
     static_assert(Size > 1, "This implementation will not work with size smaller than 2");
