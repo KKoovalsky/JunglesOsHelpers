@@ -32,6 +32,12 @@ class active_generic_impl : public active<Message>
         return message_pump.send({std::move(m)});
     }
 
+    virtual ~active_generic_impl()
+    {
+        message_pump.send(quit_message{});
+        worker_thread.join();
+    }
+
   private:
     //! Used to inform the active that it shall exit and stop the thread loop
     struct quit_message
