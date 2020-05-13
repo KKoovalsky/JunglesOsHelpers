@@ -6,7 +6,6 @@
 
 #include "active_impl.hpp"
 #include "os_def.hpp"
-#include "queue.hpp"
 
 #include "../test_helpers.hpp"
 
@@ -18,10 +17,10 @@
 #include <thread>
 
 template<typename Message>
-class message_pump_mock : jungles::queue<Message>
+class message_pump_mock
 {
   public:
-    virtual jungles::os_error send(Message&& m) override
+    jungles::os_error send(Message&& m) 
     {
         {
             std::lock_guard g{mux};
@@ -31,7 +30,7 @@ class message_pump_mock : jungles::queue<Message>
         return jungles::os_error::ok;
     }
 
-    virtual tl::expected<Message, jungles::os_error> receive(unsigned) override
+    Message receive()
     {
         std::unique_lock ul{mux};
         cv.wait(ul, [this]() { return !queue.empty(); });

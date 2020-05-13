@@ -58,13 +58,7 @@ class active_generic_impl : public active<Message>
     {
         while (true)
         {
-            auto wait_undefinitely_for_message{[this]() {
-                // As we wait undefinitely then we are sure that the message will be there always, thus we can
-                // call with * safely.
-                return *message_pump.receive(-1);
-            }};
-
-            auto msg{wait_undefinitely_for_message()};
+            auto msg{message_pump.receive()};
             if (std::holds_alternative<quit_message>(msg)) break;
 
             auto user_msg{std::get<Message>(msg)};
