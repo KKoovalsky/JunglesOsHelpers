@@ -28,9 +28,9 @@ class active_impl : public active<Message>
         message_pump.send(quit_message{});
     }
 
-    virtual os_error send(Message&& m) override
+    virtual void send(Message&& m) override
     {
-        return message_pump.send({std::move(m)});
+        message_pump.send({std::move(m)});
     }
 
   private:

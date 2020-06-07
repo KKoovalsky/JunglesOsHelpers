@@ -9,8 +9,6 @@
 
 #include <functional>
 
-#include "os_def.hpp"
-
 namespace jungles
 {
 
@@ -26,7 +24,7 @@ class active
     explicit active(on_message_received_handler message_handler) : m_message_handler{message_handler} {}
 
     //! Send a message to the background worker, so commission a job for it.
-    virtual os_error send(Message&&) = 0;
+    virtual void send(Message&&) = 0;
 
     //! Shall stop and join the background worker.
     virtual ~active() = default;

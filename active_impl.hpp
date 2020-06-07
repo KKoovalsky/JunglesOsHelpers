@@ -34,9 +34,9 @@ class active_generic_impl : public active<Message>
         active<Message>{message_handler}, worker_thread{[this]() { this->thread_code(); }}
     {}
 
-    virtual os_error send(Message&& m) override
+    virtual void send(Message&& m) override
     {
-        return message_pump.send({std::move(m)});
+        message_pump.send({std::move(m)});
     }
 
     virtual ~active_generic_impl()
