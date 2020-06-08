@@ -14,7 +14,7 @@ namespace jungles
 {
 
 template<typename Message>
-class message_pump_mock
+class message_pump
 {
   public:
     void send(Message&& m)
