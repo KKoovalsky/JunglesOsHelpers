@@ -10,6 +10,9 @@
 #include <mutex>
 #include <queue>
 
+namespace jungles
+{
+
 template<typename Message>
 class message_pump_mock
 {
@@ -37,5 +40,7 @@ class message_pump_mock
     std::mutex mux;
     std::queue<Message> queue;
 };
+
+} // namespace jungles
 
 #endif /* MESSAGE_PUMP_HPP */
