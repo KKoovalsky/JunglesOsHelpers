@@ -1,6 +1,7 @@
 # Vim related
 *.swp
 .clangd/
+tags
 
 # Build related
 build/
