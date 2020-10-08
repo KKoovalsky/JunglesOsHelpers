@@ -74,6 +74,7 @@ target_link_libraries(TestBuild freertos_kernel catch2)
 add_executable(NativeTests
     ${CMAKE_SOURCE_DIR}/test/native/main.cpp
     ${CMAKE_SOURCE_DIR}/test/native/test_active_impl.cpp
+    ${CMAKE_SOURCE_DIR}/test/native/test_asker.cpp
     ${CMAKE_SOURCE_DIR}/test/generic/test_active.cpp
 )
 find_package(Threads REQUIRED)
