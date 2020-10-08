@@ -30,6 +30,8 @@ set(FREERTOS_KERNEL_SOURCES
     ${FREERTOS_KERNEL_ROOT_DIR}/list.c
     ${FREERTOS_KERNEL_ROOT_DIR}/queue.c
     ${FREERTOS_KERNEL_ROOT_DIR}/timers.c
+    ${FREERTOS_KERNEL_ROOT_DIR}/event_groups.c
+    ${FREERTOS_KERNEL_PORT_DIR}/utils/wait_for_event.c
 )
 set_source_files_properties(${FREERTOS_KERNEL_SOURCES} PROPERTIES GENERATED TRUE)
 add_library(freertos_kernel STATIC ${FREERTOS_KERNEL_SOURCES})
@@ -60,9 +62,11 @@ add_executable(TestBuild
     test/freertos/test_thread_impl.cpp
     test/freertos/test_active_impl.cpp
     test/freertos/test_queue_impl.cpp
+    test/freertos/test_flag_impl.cpp
     test/generic/test_active.cpp
     test/generic/test_thread.cpp
     test/generic/test_queue.cpp
+    test/generic/test_flag.cpp
 )
 include_directories(${CMAKE_SOURCE_DIR})
 target_link_libraries(TestBuild freertos_kernel catch2)
