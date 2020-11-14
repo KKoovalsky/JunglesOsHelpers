@@ -97,7 +97,7 @@
 #define INCLUDE_uxTaskGetStackHighWaterMark     1
 #define INCLUDE_xTaskGetSchedulerState          1
 #define INCLUDE_xTimerGetTimerTaskHandle        0
-#define INCLUDE_xTaskGetIdleTaskHandle          0
+#define INCLUDE_xTaskGetIdleTaskHandle          1
 #define INCLUDE_xQueueGetMutexHolder            1
 #define INCLUDE_eTaskGetState                   1
 #define INCLUDE_xEventGroupSetBitsFromISR       1

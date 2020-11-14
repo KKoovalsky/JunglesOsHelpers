@@ -13,7 +13,7 @@ set(FREERTOS_KERNEL_ROOT_DIR ${CMAKE_BINARY_DIR}/freertos_kernel_repo)
 
 ExternalProject_Add(freertos_kernel_repo
     GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS-Kernel.git
-    GIT_SHALLOW 1
+    GIT_TAG 18f714f786ddbc137c632d6845c5fa2b175d3cbd
     GIT_PROGRESS 1
     SOURCE_DIR ${FREERTOS_KERNEL_ROOT_DIR}
     CONFIGURE_COMMAND "" 
@@ -25,6 +25,7 @@ ExternalProject_Add(freertos_kernel_repo
 set(FREERTOS_KERNEL_PORT_DIR ${FREERTOS_KERNEL_ROOT_DIR}/portable/ThirdParty/GCC/Posix)
 set(FREERTOS_KERNEL_SOURCES
     ${FREERTOS_KERNEL_PORT_DIR}/port.c
+    ${FREERTOS_KERNEL_PORT_DIR}/utils/wait_for_event.c
     ${FREERTOS_KERNEL_ROOT_DIR}/portable/MemMang/heap_3.c
     ${FREERTOS_KERNEL_ROOT_DIR}/tasks.c
     ${FREERTOS_KERNEL_ROOT_DIR}/list.c
