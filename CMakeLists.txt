@@ -4,48 +4,36 @@ include(ExternalProject)
 
 project(JunglesOsHelpers)
 
+include(FetchContent)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-Wall -Wextra)
 
-set(FREERTOS_KERNEL_ROOT_DIR ${CMAKE_BINARY_DIR}/freertos_kernel_repo)
-
-ExternalProject_Add(freertos_kernel_repo
-    GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS-Kernel.git
-    GIT_TAG 18f714f786ddbc137c632d6845c5fa2b175d3cbd
-    GIT_PROGRESS 1
-    SOURCE_DIR ${FREERTOS_KERNEL_ROOT_DIR}
-    CONFIGURE_COMMAND "" 
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    TEST_COMMAND ""
+FetchContent_Declare(
+    cmake_helpers
+    GIT_REPOSITORY https://github.com/KKoovalsky/CMakeHelpers.git
+    GIT_TAG main
 )
+FetchContent_MakeAvailable(cmake_helpers)
 
-set(FREERTOS_KERNEL_PORT_DIR ${FREERTOS_KERNEL_ROOT_DIR}/portable/ThirdParty/GCC/Posix)
-set(FREERTOS_KERNEL_SOURCES
-    ${FREERTOS_KERNEL_PORT_DIR}/port.c
-    ${FREERTOS_KERNEL_PORT_DIR}/utils/wait_for_event.c
-    ${FREERTOS_KERNEL_ROOT_DIR}/portable/MemMang/heap_3.c
-    ${FREERTOS_KERNEL_ROOT_DIR}/tasks.c
-    ${FREERTOS_KERNEL_ROOT_DIR}/list.c
-    ${FREERTOS_KERNEL_ROOT_DIR}/queue.c
-    ${FREERTOS_KERNEL_ROOT_DIR}/timers.c
+JunglesHelpers_DownloadAndPopulateFreeRTOSKernel(
+    freertos
+    18f714f786ddbc137c632d6845c5fa2b175d3cbd
+    heap_3
 )
-set_source_files_properties(${FREERTOS_KERNEL_SOURCES} PROPERTIES GENERATED TRUE)
-add_library(freertos_kernel STATIC ${FREERTOS_KERNEL_SOURCES})
-add_dependencies(freertos_kernel freertos_kernel_repo)
-target_include_directories(freertos_kernel PUBLIC
+set(freertos_port_dir ${FREERTOS_SOURCE_DIR}/portable/ThirdParty/GCC/Posix)
+target_include_directories(freertos PUBLIC
     ${CMAKE_SOURCE_DIR}/test/freertos
-    ${FREERTOS_KERNEL_PORT_DIR}
-    ${FREERTOS_KERNEL_ROOT_DIR}/include
+    ${freertos_port_dir}
 )
-target_link_libraries(freertos_kernel pthread)
+target_sources(freertos PRIVATE ${freertos_port_dir}/port.c ${freertos_port_dir}/utils/wait_for_event.c)
+target_link_libraries(freertos pthread)
 
 set(CATCH_BUILD_TESTING OFF CACHE BOOL "Internal Catch2's option to disable Catch2 self-test")
 set(BUILD_TESTING OFF CACHE BOOL "Internal Catch2's option to disable Catch2 self-test")
 
-include(FetchContent)
 FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
@@ -64,7 +52,7 @@ add_executable(TestBuild
     test/generic/test_queue.cpp
 )
 include_directories(${CMAKE_SOURCE_DIR})
-target_link_libraries(TestBuild freertos_kernel Catch2::Catch2)
+target_link_libraries(TestBuild freertos Catch2::Catch2)
 
 add_executable(NativeTests
     ${CMAKE_SOURCE_DIR}/test/native/main.cpp
