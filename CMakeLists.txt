@@ -41,18 +41,16 @@ target_include_directories(freertos_kernel PUBLIC
 )
 target_link_libraries(freertos_kernel pthread)
 
-set(CATCH_ROOT_DIR ${CMAKE_BINARY_DIR}/catch2_repo)
-list(APPEND CATCH2_CMAKE_ARGS 
-    "-DCATCH_BUILD_TESTING=OFF" "-DCATCH_INSTALL_DOCS=OFF" "-DCATCH_INSTALL_HELPERS=OFF"
-    "-DCMAKE_INSTALL_PREFIX:PATH=${CATCH_ROOT_DIR}"
-)
-ExternalProject_Add(catch2_repo
+set(CATCH_BUILD_TESTING OFF CACHE BOOL "Internal Catch2's option to disable Catch2 self-test")
+set(BUILD_TESTING OFF CACHE BOOL "Internal Catch2's option to disable Catch2 self-test")
+
+include(FetchContent)
+FetchContent_Declare(
+    Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    CMAKE_ARGS ${CATCH2_CMAKE_ARGS}
+    GIT_TAG 0fa133a0c5e065065ef96ac2b6c0284cf5da265d
 )
-add_library(catch2 INTERFACE)
-add_dependencies(catch2 catch2_repo)
-target_include_directories(catch2 INTERFACE ${CATCH_ROOT_DIR}/include)
+FetchContent_MakeAvailable(Catch2)
 
 add_executable(TestBuild
     test/freertos/main.cpp
@@ -65,7 +63,7 @@ add_executable(TestBuild
     test/generic/test_queue.cpp
 )
 include_directories(${CMAKE_SOURCE_DIR})
-target_link_libraries(TestBuild freertos_kernel catch2)
+target_link_libraries(TestBuild freertos_kernel Catch2::Catch2)
 
 add_executable(NativeTests
     ${CMAKE_SOURCE_DIR}/test/native/main.cpp
@@ -73,4 +71,4 @@ add_executable(NativeTests
     ${CMAKE_SOURCE_DIR}/test/generic/test_active.cpp
 )
 find_package(Threads REQUIRED)
-target_link_libraries(NativeTests catch2 Threads::Threads)
+target_link_libraries(NativeTests Catch2::Catch2 Threads::Threads)
