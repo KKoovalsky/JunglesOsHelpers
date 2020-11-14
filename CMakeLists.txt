@@ -29,7 +29,9 @@ target_include_directories(freertos PUBLIC
     ${freertos_port_dir}
 )
 target_sources(freertos PRIVATE ${freertos_port_dir}/port.c ${freertos_port_dir}/utils/wait_for_event.c)
-target_link_libraries(freertos pthread)
+
+find_package(Threads REQUIRED)
+target_link_libraries(freertos Threads::Threads)
 
 set(CATCH_BUILD_TESTING OFF CACHE BOOL "Internal Catch2's option to disable Catch2 self-test")
 set(BUILD_TESTING OFF CACHE BOOL "Internal Catch2's option to disable Catch2 self-test")
@@ -41,23 +43,26 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
-add_executable(TestBuild
-    test/freertos/main.cpp
-    test/freertos/os_delayed_job_test.cpp
-    test/freertos/test_thread_impl.cpp
-    test/freertos/test_active_impl.cpp
-    test/freertos/test_queue_impl.cpp
-    test/generic/test_active.cpp
-    test/generic/test_thread.cpp
-    test/generic/test_queue.cpp
+set(generic_tests_dir ${CMAKE_CURRENT_LIST_DIR}/test/generic)
+set(freertos_tests_dir ${CMAKE_CURRENT_LIST_DIR}/test/freertos)
+set(native_tests_dir ${CMAKE_CURRENT_LIST_DIR}/test/native)
+
+add_executable(freertos_helpers_tests
+    ${freertos_tests_dir}/main.cpp
+    ${freertos_tests_dir}/os_delayed_job_test.cpp
+    ${freertos_tests_dir}/test_thread_impl.cpp
+    ${freertos_tests_dir}/test_active_impl.cpp
+    ${freertos_tests_dir}/test_queue_impl.cpp
+    ${generic_tests_dir}/test_active.cpp
+    ${generic_tests_dir}/test_thread.cpp
+    ${generic_tests_dir}/test_queue.cpp
 )
 include_directories(${CMAKE_SOURCE_DIR})
-target_link_libraries(TestBuild freertos Catch2::Catch2)
+target_link_libraries(freertos_helpers_tests freertos Catch2::Catch2)
 
-add_executable(NativeTests
-    ${CMAKE_SOURCE_DIR}/test/native/main.cpp
-    ${CMAKE_SOURCE_DIR}/test/native/test_active_impl.cpp
-    ${CMAKE_SOURCE_DIR}/test/generic/test_active.cpp
+add_executable(native_helpers_tests
+    ${native_tests_dir}/main.cpp
+    ${native_tests_dir}/test_active_impl.cpp
+    ${generic_tests_dir}/test_active.cpp
 )
-find_package(Threads REQUIRED)
-target_link_libraries(NativeTests Catch2::Catch2 Threads::Threads)
+target_link_libraries(native_helpers_tests Catch2::Catch2 Threads::Threads)
