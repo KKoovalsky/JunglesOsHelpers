@@ -60,22 +60,31 @@ macro (CreateFreeRTOSHelpersTestsExecutable)
         ${generic_tests_dir}/test_queue.cpp
     )
     target_include_directories(freertos_helpers_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR})
-    target_link_libraries(freertos_helpers_tests freertos Catch2::Catch2)
+    target_link_libraries(freertos_helpers_tests PRIVATE freertos Catch2::Catch2)
     target_compile_features(freertos_helpers_tests PRIVATE cxx_std_17)
     target_compile_options(freertos_helpers_tests PRIVATE -Wall -Wextra)
+    target_link_libraries(freertos_helpers_tests PRIVATE JunglesOsHelpers)
 endmacro()
 
 
 macro(CreateNativeHelpersTestsExecutable)
     add_executable(native_helpers_tests
         ${native_tests_dir}/main.cpp
-        ${native_tests_dir}/test_active_impl.cpp
         ${generic_tests_dir}/test_active.cpp
     )
-    target_include_directories(native_helpers_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR})
-    target_link_libraries(native_helpers_tests Catch2::Catch2 Threads::Threads)
+    target_include_directories(native_helpers_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${native_tests_dir})
+    target_link_libraries(native_helpers_tests PRIVATE Catch2::Catch2 Threads::Threads)
     target_compile_features(native_helpers_tests PRIVATE cxx_std_17)
     target_compile_options(native_helpers_tests PRIVATE -Wall -Wextra)
+    target_link_libraries(native_helpers_tests PRIVATE JunglesOsHelpers)
+endmacro()
+
+
+macro(CreateMainTarget)
+    add_library(JunglesOsHelpers INTERFACE)
+    target_include_directories(JunglesOsHelpers INTERFACE ${lib_dir})
+    target_compile_features(JunglesOsHelpers INTERFACE cxx_std_17)
+    target_compile_options(JunglesOsHelpers INTERFACE -Wall -Wextra)
 endmacro()
 
 
@@ -88,10 +97,13 @@ project(JunglesOsHelpers)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+CreateMainTarget()
+
 DownloadAndPopulateCMakeHelpers()
 DownloadAndPopulateFreeRTOSKernel()
 DownloadAndPopulateCatch2()
 
+set(lib_dir ${CMAKE_CURRENT_LIST_DIR})
 set(generic_tests_dir ${CMAKE_CURRENT_LIST_DIR}/test/generic)
 set(freertos_tests_dir ${CMAKE_CURRENT_LIST_DIR}/test/freertos)
 set(native_tests_dir ${CMAKE_CURRENT_LIST_DIR}/test/native)
