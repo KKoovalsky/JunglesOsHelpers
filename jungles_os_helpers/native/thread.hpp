@@ -6,8 +6,6 @@
 #ifndef JUNGLES_NATIVE_THREAD_HPP
 #define JUNGLES_NATIVE_THREAD_HPP
 
-#include "jungles_os_helpers/interfaces/joinable_thread_not_running_initially.hpp"
-
 #include <thread>
 
 namespace jungles
@@ -16,15 +14,15 @@ namespace jungles
 namespace native
 {
 
-class thread : public jungles::interface::joinable_thread_not_running_initially
+class thread 
 {
   public:
-    virtual void start(std::function<void(void)> f) override
+    void start(std::function<void(void)> f)
     {
         underlying_thread = std::thread{std::move(f)};
     }
 
-    virtual void join() override
+    void join()
     {
         underlying_thread.join();
     }

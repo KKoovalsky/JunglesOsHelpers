@@ -17,10 +17,10 @@ namespace native
 {
 
 template<typename Message>
-class message_pump : public jungles::interface::message_pump<Message>
+class message_pump
 {
   public:
-    virtual void send(Message&& m) override
+    void send(Message&& m)
     {
         {
             std::lock_guard g{mux};
@@ -29,7 +29,7 @@ class message_pump : public jungles::interface::message_pump<Message>
         cv.notify_all();
     }
 
-    virtual Message receive() override
+    Message receive()
     {
         std::unique_lock ul{mux};
         cv.wait(ul, [this]() { return !queue.empty(); });
