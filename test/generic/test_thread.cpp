@@ -6,18 +6,13 @@
 
 #include "catch2/catch.hpp"
 
-#include "thread.hpp"
-
 #include <algorithm>
 #include <iostream>
 #include <memory>
 
 #include "../test_helpers.hpp"
 
-using namespace jungles;
-
-//! Shall return thread implementation basing on the compilation target (for FreeRTOS or e.g. mbed).
-std::unique_ptr<thread> get_thread_for_test_run(std::function<void(void)>);
+#include "thread_under_test_definition.hpp"
 
 TEST_CASE("Thread is able to run a task", "[thread]")
 {
@@ -51,7 +46,7 @@ TEST_CASE("Thread is able to run a task", "[thread]")
                 thread_destructed_flag.wait();
                 thread_shall_set_this_flag_after_detach.set();
             })};
-            REQUIRE(t->detach() == os_error::ok);
+            REQUIRE_NOTHROW(t.detach());
         }
 
         thread_destructed_flag.set();
@@ -75,7 +70,7 @@ TEST_CASE("Thread is able to run a task", "[thread]")
             thread_started_flag.wait();
             thread_shall_finish.set();
 
-            REQUIRE(t->join() == os_error::ok);
+            REQUIRE_NOTHROW(t.join());
         }
 
         REQUIRE(thread_started_flag.is_set() == true);
@@ -85,8 +80,8 @@ TEST_CASE("Thread is able to run a task", "[thread]")
     SECTION("Can't detach after joining")
     {
         auto t{get_thread_for_test_run([]() {})};
-        t->join();
-        REQUIRE(t->detach() != os_error::ok);
+        t.join();
+        REQUIRE_THROWS(t.detach());
     }
 
     SECTION("Can't detach after detach")
@@ -97,8 +92,8 @@ TEST_CASE("Thread is able to run a task", "[thread]")
         test_helpers::flag thread_finished_flag;
         {
             auto t{get_thread_for_test_run([&]() { thread_finished_flag.set(); })};
-            t->detach();
-            REQUIRE(t->detach() != os_error::ok);
+            t.detach();
+            REQUIRE_THROWS(t.detach());
         }
         thread_finished_flag.wait();
     }
@@ -106,7 +101,7 @@ TEST_CASE("Thread is able to run a task", "[thread]")
     SECTION("Can join multiple times")
     {
         auto t{get_thread_for_test_run([]() {})};
-        t->join();
-        REQUIRE(t->join() == os_error::ok);
+        t.join();
+        REQUIRE_NOTHROW(t.join());
     }
 }

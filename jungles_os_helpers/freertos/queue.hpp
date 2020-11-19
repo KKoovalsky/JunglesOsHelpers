@@ -1,40 +1,40 @@
 /**
- * @file	queue_impl.hpp
+ * @file	queue.hpp
  * @brief	Implements queue basing on the interface in queue.hpp for FreeRTOS.
  * @author	Kacper Kowalski - kacper.s.kowalski@gmail.com
  */
-#ifndef QUEUE_IMPL_HPP
-#define QUEUE_IMPL_HPP
-
-#include "projdefs.h"
-#include "queue.hpp"
+#ifndef FREERTOS_QUEUE_HPP
+#define FREERTOS_QUEUE_HPP
 
 #include "FreeRTOS.h"
+#include "projdefs.h"
 #include "queue.h"
 #include "semphr.h"
 
 #include "lockguard.hpp"
 
 #include <array>
-#include <tl/expected.hpp>
-
 #include <boost/container/static_vector.hpp>
+#include <exception>
 
 namespace jungles
 {
 
+namespace freertos
+{
+
 template<typename ElementType, std::size_t Size>
-class queue_impl : public queue<ElementType>
+class queue
 {
   public:
     static_assert(Size > 1, "This implementation will not work with size smaller than 2");
 
-    queue_impl(const queue_impl&) = delete;
-    queue_impl& operator=(const queue_impl&) = delete;
-    queue_impl(queue_impl&&) = delete;
-    queue_impl& operator=(queue_impl&&) = delete;
+    queue(const queue&) = delete;
+    queue& operator=(const queue&) = delete;
+    queue(queue&&) = delete;
+    queue& operator=(queue&&) = delete;
 
-    queue_impl() :
+    queue() :
         queue_depot_mux{xSemaphoreCreateMutexStatic(&queue_depot_mux_storage)},
         num_elements_counting_sem{xSemaphoreCreateCountingStatic(Size, 0, &num_elements_counting_sem_storage)}
     {
@@ -42,13 +42,13 @@ class queue_impl : public queue<ElementType>
         assert(num_elements_counting_sem != nullptr);
     }
 
-    ~queue_impl()
+    ~queue()
     {
         vSemaphoreDelete(queue_depot_mux);
         vSemaphoreDelete(num_elements_counting_sem);
     }
 
-    virtual os_error send(ElementType&& elem) override
+    void send(ElementType&& elem)
     {
         bool is_full{false};
         {
@@ -61,24 +61,34 @@ class queue_impl : public queue<ElementType>
                 ++queue_depot_elem_count;
             }
         }
-        if (!is_full) { assert(xSemaphoreGive(num_elements_counting_sem) == pdTRUE); }
-        return is_full ? os_error::queue_full : os_error::ok;
-    }
 
-    virtual tl::expected<ElementType, os_error> receive(unsigned timeout_ms)
-    {
-        if (xSemaphoreTake(num_elements_counting_sem, pdMS_TO_TICKS(timeout_ms)) == pdTRUE)
+        if (!is_full)
         {
-            lockguard g(queue_depot_mux);
-            auto r{std::move(queue_depot[queue_depot_tail])};
-            increment_circular_buffer_index(queue_depot_tail);
-            --queue_depot_elem_count;
-            return r;
+            auto r{xSemaphoreGive(num_elements_counting_sem)};
+            assert(r == pdTRUE);
         } else
         {
-            return tl::unexpected(os_error::queue_empty);
+            throw queue_full_error{};
         }
     }
+
+    ElementType receive()
+    {
+        return *receive_impl(portMAX_DELAY);
+    }
+
+    std::optional<ElementType> receive(unsigned timeout_ms)
+    {
+        return receive_impl(pdMS_TO_TICKS(timeout_ms));
+    }
+
+    struct error : public std::exception
+    {
+    };
+
+    struct queue_full_error : public error
+    {
+    };
 
   private:
     void increment_circular_buffer_index(unsigned& index)
@@ -91,6 +101,21 @@ class queue_impl : public queue<ElementType>
         return std::next(std::begin(queue_depot), index);
     }
 
+    std::optional<ElementType> receive_impl(TickType_t timeout)
+    {
+        if (xSemaphoreTake(num_elements_counting_sem, timeout) == pdTRUE)
+        {
+            lockguard g(queue_depot_mux);
+            auto r{std::move(queue_depot[queue_depot_tail])};
+            increment_circular_buffer_index(queue_depot_tail);
+            --queue_depot_elem_count;
+            return r;
+        } else
+        {
+            return {};
+        }
+    }
+
     //! @todo Shall be circular buffer.
     boost::container::static_vector<ElementType, Size> queue_depot;
     unsigned queue_depot_tail{0}, queue_depot_head{0}, queue_depot_elem_count{0};
@@ -98,9 +123,10 @@ class queue_impl : public queue<ElementType>
     SemaphoreHandle_t num_elements_counting_sem;
     StaticSemaphore_t queue_depot_mux_storage;
     StaticSemaphore_t num_elements_counting_sem_storage;
+};
 
-}; // namespace jungles
+} // namespace freertos
 
 } // namespace jungles
 
-#endif /* QUEUE_IMPL_HPP */
+#endif /* FREERTOS_QUEUE_HPP */

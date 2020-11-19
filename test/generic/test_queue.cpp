@@ -9,52 +9,47 @@
 #include <iostream>
 #include <thread>
 
-#include "os_def.hpp"
-#include "queue.hpp"
-#include "thread.hpp"
+#include "queue_under_test_definition.hpp"
+#include "thread_under_test_definition.hpp"
 
 #include "../test_helpers.hpp"
 
-//! Shall return queue implementation basing on the compilation target (for FreeRTOS or e.g. mbed).
-std::unique_ptr<jungles::queue<unsigned>> get_queue_of_size_4_for_test_run();
-
-std::unique_ptr<jungles::thread> get_thread_for_test_run(std::function<void(void)>);
-
 TEST_CASE("Messages are received and sent to the queue", "[queue]")
 {
-    auto q{get_queue_of_size_4_for_test_run()};
+    auto q{get_queue_object_for_test_run<std::string, 4>()};
+
     SECTION("Few messages sent and received from queue")
     {
         SECTION("All messages sent and then received")
         {
-            REQUIRE(q->send({1}) == jungles::os_error::ok);
-            REQUIRE(q->receive(0).value() == 1);
-            REQUIRE(q->send({2}) == jungles::os_error::ok);
-            REQUIRE(q->receive(0).value() == 2);
-            REQUIRE(q->send({3}) == jungles::os_error::ok);
-            REQUIRE(q->receive(0).value() == 3);
+            REQUIRE_NOTHROW(q.send("1"));
+            REQUIRE(q.receive(0).value() == "1");
+            REQUIRE_NOTHROW(q.send("2"));
+            REQUIRE(q.receive(0).value() == "2");
+            REQUIRE_NOTHROW(q.send("3"));
+            REQUIRE(q.receive(0).value() == "3");
         }
         SECTION("Sending and receiving is interleaved")
         {
-            REQUIRE(q->send({1}) == jungles::os_error::ok);
-            REQUIRE(q->send({2}) == jungles::os_error::ok);
-            REQUIRE(q->send({3}) == jungles::os_error::ok);
-            REQUIRE(q->receive(0).value() == 1);
-            REQUIRE(q->receive(0).value() == 2);
-            REQUIRE(q->receive(0).value() == 3);
+            q.send("1");
+            q.send("2");
+            q.send("3");
+            REQUIRE(q.receive(0).value() == "1");
+            REQUIRE(q.receive(0).value() == "2");
+            REQUIRE(q.receive(0).value() == "3");
         }
     }
     SECTION("Timeout occured when receiving from an empty queue")
     {
-        REQUIRE(q->receive(300).error() == jungles::os_error::queue_empty);
+        REQUIRE(!q.receive(300).has_value());
     }
     SECTION("Queue overflows when too many elements in the queue")
     {
-        q->send({1});
-        q->send({1});
-        q->send({1});
-        REQUIRE(q->send({1}) == jungles::os_error::ok);
-        REQUIRE(q->send({1}) == jungles::os_error::queue_full);
+        q.send("1");
+        q.send("1");
+        q.send("1");
+        REQUIRE_NOTHROW(q.send("1"));
+        REQUIRE_THROWS(q.send("1"));
     }
     GIVEN("Queue is empty")
     {
@@ -62,12 +57,12 @@ TEST_CASE("Messages are received and sent to the queue", "[queue]")
         {
             test_helpers::flag receive_blocked;
 
-            std::promise<unsigned> receive_result;
+            std::promise<std::string> receive_result;
             auto future_receive_result{receive_result.get_future()};
 
             auto t{get_thread_for_test_run([&] {
                 receive_blocked.set();
-                auto r{q->receive(10000)};
+                auto r{q.receive(10000)};
                 receive_result.set_value(*r);
             })};
 
@@ -75,11 +70,11 @@ TEST_CASE("Messages are received and sent to the queue", "[queue]")
             {
                 receive_blocked.wait();
                 std::this_thread::yield();
-                q->send({5});
+                q.send("5");
 
                 THEN("Message 1. is successfully received")
                 {
-                    REQUIRE(future_receive_result.get() == 5);
+                    REQUIRE(future_receive_result.get() == "5");
                 }
             }
         }
