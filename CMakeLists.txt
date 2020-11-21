@@ -24,6 +24,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 CreateMainTarget()
 
-enable_testing()
-add_subdirectory(test)
+set(JUNGLES_OS_HELPERS_ENABLE_TESTING OFF CACHE BOOL "Enables self-testing of the library")
 
+if(JUNGLES_OS_HELPERS_ENABLE_TESTING)
+    enable_testing()
+    add_subdirectory(test)
+endif()
