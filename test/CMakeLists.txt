@@ -50,6 +50,13 @@ macro(DownloadAndPopulateCatch2)
 endmacro()
 
 
+macro(EnableCatch2TestExtras)
+    include(CTest)
+    FetchContent_GetProperties(Catch2)
+    list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
+    include(Catch)
+endmacro()
+
 macro (CreateFreeRTOSHelpersTests)
     add_executable(freertos_helpers_tests
         ${freertos_tests_dir}/main.cpp
@@ -88,6 +95,7 @@ endmacro()
 DownloadAndPopulateCMakeHelpers()
 DownloadAndPopulateFreeRTOSKernel()
 DownloadAndPopulateCatch2()
+EnableCatch2TestExtras()
 
 set(generic_tests_dir ${CMAKE_CURRENT_LIST_DIR}/generic)
 set(freertos_tests_dir ${CMAKE_CURRENT_LIST_DIR}/freertos)
