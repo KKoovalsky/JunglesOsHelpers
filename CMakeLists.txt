@@ -52,14 +52,10 @@ endmacro()
 macro (CreateFreeRTOSHelpersTestsExecutable)
     add_executable(freertos_helpers_tests
         ${freertos_tests_dir}/main.cpp
-        ${freertos_tests_dir}/test_thread_impl.cpp
-        ${freertos_tests_dir}/test_active_impl.cpp
-        ${freertos_tests_dir}/test_queue_impl.cpp
-        ${generic_tests_dir}/test_active.cpp
         ${generic_tests_dir}/test_thread.cpp
         ${generic_tests_dir}/test_queue.cpp
     )
-    target_include_directories(freertos_helpers_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+    target_include_directories(freertos_helpers_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${freertos_tests_dir})
     target_link_libraries(freertos_helpers_tests PRIVATE freertos Catch2::Catch2)
     target_compile_features(freertos_helpers_tests PRIVATE cxx_std_17)
     target_compile_options(freertos_helpers_tests PRIVATE -Wall -Wextra)

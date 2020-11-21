@@ -9,11 +9,11 @@
 #include <string>
 #include <vector>
 
-inline jungles::freertos::thread get_thread_for_test_run(std::function<void(void)> f)
+inline jungles::freertos::thread get_thread_for_test_run()
 {
     static std::vector<std::string> thread_names;
     static unsigned thread_num{0};
     thread_names.push_back("Test_thread_" + std::to_string(thread_num));
     ++thread_num;
-    return jungles::freertos::thread(f, thread_names.back(), 512, 1);
+    return jungles::freertos::thread(thread_names.back(), 512, 1);
 }

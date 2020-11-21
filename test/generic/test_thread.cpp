@@ -22,10 +22,11 @@ TEST_CASE("Thread is able to run a task", "[thread]")
         test_helpers::flag thread_shall_finish;
 
         {
-            auto t{get_thread_for_test_run([&]() {
+            auto t{get_thread_for_test_run()};
+            t.start([&]() {
                 thread_started_flag.set();
                 thread_shall_finish.wait();
-            })};
+            });
 
             test_helpers::notify_on_destruction n{thread_shall_finish};
 
@@ -42,10 +43,11 @@ TEST_CASE("Thread is able to run a task", "[thread]")
         test_helpers::flag thread_shall_set_this_flag_after_detach;
 
         {
-            auto t{get_thread_for_test_run([&]() {
+            auto t{get_thread_for_test_run()};
+            t.start([&]() {
                 thread_destructed_flag.wait();
                 thread_shall_set_this_flag_after_detach.set();
-            })};
+            });
             REQUIRE_NOTHROW(t.detach());
         }
 
@@ -62,10 +64,11 @@ TEST_CASE("Thread is able to run a task", "[thread]")
         test_helpers::flag thread_shall_finish;
 
         {
-            auto t{get_thread_for_test_run([&]() {
+            auto t{get_thread_for_test_run()};
+            t.start([&]() {
                 thread_started_flag.set();
                 thread_shall_finish.wait();
-            })};
+            });
 
             thread_started_flag.wait();
             thread_shall_finish.set();
@@ -79,7 +82,8 @@ TEST_CASE("Thread is able to run a task", "[thread]")
 
     SECTION("Can't detach after joining")
     {
-        auto t{get_thread_for_test_run([]() {})};
+        auto t{get_thread_for_test_run()};
+        t.start([]() {});
         t.join();
         REQUIRE_THROWS(t.detach());
     }
@@ -91,7 +95,8 @@ TEST_CASE("Thread is able to run a task", "[thread]")
         // this section.
         test_helpers::flag thread_finished_flag;
         {
-            auto t{get_thread_for_test_run([&]() { thread_finished_flag.set(); })};
+            auto t{get_thread_for_test_run()};
+            t.start([&]() { thread_finished_flag.set(); });
             t.detach();
             REQUIRE_THROWS(t.detach());
         }
@@ -100,7 +105,8 @@ TEST_CASE("Thread is able to run a task", "[thread]")
 
     SECTION("Can join multiple times")
     {
-        auto t{get_thread_for_test_run([]() {})};
+        auto t{get_thread_for_test_run()};
+        t.start([]() {});
         t.join();
         REQUIRE_NOTHROW(t.join());
     }

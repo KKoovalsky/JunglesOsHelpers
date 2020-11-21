@@ -60,11 +60,12 @@ TEST_CASE("Messages are received and sent to the queue", "[queue]")
             std::promise<std::string> receive_result;
             auto future_receive_result{receive_result.get_future()};
 
-            auto t{get_thread_for_test_run([&] {
+            auto t{get_thread_for_test_run()};
+            t.start([&] {
                 receive_blocked.set();
                 auto r{q.receive(10000)};
                 receive_result.set_value(*r);
-            })};
+            });
 
             AND_WHEN("Message 2. is sent in the same time")
             {
