@@ -11,7 +11,7 @@
 template<typename Message>
 auto get_active_object_for_test_run(std::function<void(Message&&)> f)
 {
-    return jungles::native::active<Message>(f);
+    return jungles::freertos::active<Message, 16>(f, "freertos_active", 1024, 1);
 }
 
 #endif /* ACTIVE_UNDER_TEST_DEFINITION_HPP */

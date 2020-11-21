@@ -52,6 +52,7 @@ endmacro()
 macro (CreateFreeRTOSHelpersTestsExecutable)
     add_executable(freertos_helpers_tests
         ${freertos_tests_dir}/main.cpp
+        ${generic_tests_dir}/test_active.cpp
         ${generic_tests_dir}/test_thread.cpp
         ${generic_tests_dir}/test_queue.cpp
     )
