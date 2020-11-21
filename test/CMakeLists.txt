@@ -50,7 +50,7 @@ macro(DownloadAndPopulateCatch2)
 endmacro()
 
 
-macro (CreateFreeRTOSHelpersTestsExecutable)
+macro (CreateFreeRTOSHelpersTests)
     add_executable(freertos_helpers_tests
         ${freertos_tests_dir}/main.cpp
         ${generic_tests_dir}/test_active.cpp
@@ -62,10 +62,11 @@ macro (CreateFreeRTOSHelpersTestsExecutable)
     target_compile_features(freertos_helpers_tests PRIVATE cxx_std_17)
     target_compile_options(freertos_helpers_tests PRIVATE -Wall -Wextra)
     target_link_libraries(freertos_helpers_tests PRIVATE JunglesOsHelpers)
+    add_test(NAME freertos_helpers COMMAND freertos_helpers_tests)
 endmacro()
 
 
-macro(CreateNativeHelpersTestsExecutable)
+macro(CreateNativeHelpersTests)
     add_executable(native_helpers_tests
         ${native_tests_dir}/main.cpp
         ${generic_tests_dir}/test_active.cpp
@@ -75,6 +76,7 @@ macro(CreateNativeHelpersTestsExecutable)
     target_compile_features(native_helpers_tests PRIVATE cxx_std_17)
     target_compile_options(native_helpers_tests PRIVATE -Wall -Wextra)
     target_link_libraries(native_helpers_tests PRIVATE JunglesOsHelpers)
+    add_test(NAME native_helpers COMMAND valgrind --leak-check=full ./native_helpers_tests)
 endmacro()
 
 
@@ -91,5 +93,5 @@ set(generic_tests_dir ${CMAKE_CURRENT_LIST_DIR}/generic)
 set(freertos_tests_dir ${CMAKE_CURRENT_LIST_DIR}/freertos)
 set(native_tests_dir ${CMAKE_CURRENT_LIST_DIR}/native)
 
-CreateFreeRTOSHelpersTestsExecutable()
-CreateNativeHelpersTestsExecutable()
+CreateFreeRTOSHelpersTests()
+CreateNativeHelpersTests()

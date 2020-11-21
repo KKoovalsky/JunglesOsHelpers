@@ -24,5 +24,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 CreateMainTarget()
 
+enable_testing()
 add_subdirectory(test)
 
