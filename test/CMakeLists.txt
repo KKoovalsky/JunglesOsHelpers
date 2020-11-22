@@ -70,6 +70,7 @@ endmacro()
 macro(CreateNativeHelpersTests)
     add_executable(native_helpers_tests
         ${native_tests_dir}/main.cpp
+        ${native_tests_dir}/test_asker.cpp
         ${generic_tests_dir}/test_active.cpp
     )
     target_include_directories(native_helpers_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${native_tests_dir})
