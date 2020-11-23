@@ -18,7 +18,7 @@ The library is meant to be used with `CMake`. The best approach to use it is:
 ```
 include(FetchContent)
 FetchContent_Declare(JunglesOsHelpersLib
-    GIT_REPOSITORY https://github.com/KKoovalsky/JunglesOsStructs.git
+    GIT_REPOSITORY https://github.com/KKoovalsky/JunglesOsHelpers.git
     GIT_TAG master
 )
 
