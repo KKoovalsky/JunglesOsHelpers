@@ -1,81 +1,32 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 
-include(ExternalProject)
+################################################################################
+# Macros
+################################################################################
+
+
+macro(CreateMainTarget)
+    add_library(JunglesOsHelpers INTERFACE)
+    target_include_directories(JunglesOsHelpers INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+    target_compile_features(JunglesOsHelpers INTERFACE cxx_std_17)
+    target_compile_options(JunglesOsHelpers INTERFACE -Wall -Wextra)
+endmacro()
+
+
+################################################################################
+# Main script
+################################################################################
+
 
 project(JunglesOsHelpers)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_CXX_STANDARD 17)
-add_compile_options(-Wall -Wextra)
+CreateMainTarget()
 
-set(FREERTOS_KERNEL_ROOT_DIR ${CMAKE_BINARY_DIR}/freertos_kernel_repo)
+set(JUNGLES_OS_HELPERS_ENABLE_TESTING OFF CACHE BOOL "Enables self-testing of the library")
 
-ExternalProject_Add(freertos_kernel_repo
-    GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS-Kernel.git
-    GIT_SHALLOW 1
-    GIT_PROGRESS 1
-    SOURCE_DIR ${FREERTOS_KERNEL_ROOT_DIR}
-    CONFIGURE_COMMAND "" 
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    TEST_COMMAND ""
-)
-
-set(FREERTOS_KERNEL_PORT_DIR ${FREERTOS_KERNEL_ROOT_DIR}/portable/ThirdParty/GCC/Posix)
-set(FREERTOS_KERNEL_SOURCES
-    ${FREERTOS_KERNEL_PORT_DIR}/port.c
-    ${FREERTOS_KERNEL_ROOT_DIR}/portable/MemMang/heap_3.c
-    ${FREERTOS_KERNEL_ROOT_DIR}/tasks.c
-    ${FREERTOS_KERNEL_ROOT_DIR}/list.c
-    ${FREERTOS_KERNEL_ROOT_DIR}/queue.c
-    ${FREERTOS_KERNEL_ROOT_DIR}/timers.c
-    ${FREERTOS_KERNEL_ROOT_DIR}/event_groups.c
-    ${FREERTOS_KERNEL_PORT_DIR}/utils/wait_for_event.c
-)
-set_source_files_properties(${FREERTOS_KERNEL_SOURCES} PROPERTIES GENERATED TRUE)
-add_library(freertos_kernel STATIC ${FREERTOS_KERNEL_SOURCES})
-add_dependencies(freertos_kernel freertos_kernel_repo)
-target_include_directories(freertos_kernel PUBLIC
-    ${CMAKE_SOURCE_DIR}/test/freertos
-    ${FREERTOS_KERNEL_PORT_DIR}
-    ${FREERTOS_KERNEL_ROOT_DIR}/include
-)
-target_link_libraries(freertos_kernel pthread)
-
-set(CATCH_ROOT_DIR ${CMAKE_BINARY_DIR}/catch2_repo)
-list(APPEND CATCH2_CMAKE_ARGS 
-    "-DCATCH_BUILD_TESTING=OFF" "-DCATCH_INSTALL_DOCS=OFF" "-DCATCH_INSTALL_HELPERS=OFF"
-    "-DCMAKE_INSTALL_PREFIX:PATH=${CATCH_ROOT_DIR}"
-)
-ExternalProject_Add(catch2_repo
-    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    CMAKE_ARGS ${CATCH2_CMAKE_ARGS}
-)
-add_library(catch2 INTERFACE)
-add_dependencies(catch2 catch2_repo)
-target_include_directories(catch2 INTERFACE ${CATCH_ROOT_DIR}/include)
-
-add_executable(TestBuild
-    test/freertos/main.cpp
-    test/freertos/os_delayed_job_test.cpp
-    test/freertos/test_thread_impl.cpp
-    test/freertos/test_active_impl.cpp
-    test/freertos/test_queue_impl.cpp
-    test/freertos/test_flag_impl.cpp
-    test/generic/test_active.cpp
-    test/generic/test_thread.cpp
-    test/generic/test_queue.cpp
-    test/generic/test_flag.cpp
-)
-include_directories(${CMAKE_SOURCE_DIR})
-target_link_libraries(TestBuild freertos_kernel catch2)
-
-add_executable(NativeTests
-    ${CMAKE_SOURCE_DIR}/test/native/main.cpp
-    ${CMAKE_SOURCE_DIR}/test/native/test_active_impl.cpp
-    ${CMAKE_SOURCE_DIR}/test/native/test_poller.cpp
-    ${CMAKE_SOURCE_DIR}/test/generic/test_active.cpp
-)
-find_package(Threads REQUIRED)
-target_link_libraries(NativeTests catch2 Threads::Threads)
+if(JUNGLES_OS_HELPERS_ENABLE_TESTING)
+    enable_testing()
+    add_subdirectory(test)
+endif()

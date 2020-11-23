@@ -10,9 +10,8 @@
 #include <iostream>
 #include <thread>
 
-#include "freertos/os_delayed_job.hpp"
-
 #include "FreeRTOS.h"
+#include "task.h"
 
 // --------------------------------------------------------------------------------------------------------------------
 // The vApplicationGetIdleTaskMemory and vApplicationGetTimerTaskMemory code below is copy-pasted from the FreeRTOS

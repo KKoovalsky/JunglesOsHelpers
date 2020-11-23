@@ -3,14 +3,17 @@
  * @brief	Message pump implementation for a native build
  * @author	Kacper Kowalski - kacper.s.kowalski@gmail.com
  */
-#ifndef MESSAGE_PUMP_HPP
-#define MESSAGE_PUMP_HPP
+#ifndef NATIVE_MESSAGE_PUMP_HPP
+#define NATIVE_MESSAGE_PUMP_HPP
 
 #include <condition_variable>
 #include <mutex>
 #include <queue>
 
 namespace jungles
+{
+
+namespace native
 {
 
 template<typename Message>
@@ -41,6 +44,8 @@ class message_pump
     std::queue<Message> queue;
 };
 
+} // namespace native
+
 } // namespace jungles
 
-#endif /* MESSAGE_PUMP_HPP */
+#endif /* NATIVE_MESSAGE_PUMP_HPP */

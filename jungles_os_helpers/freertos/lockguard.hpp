@@ -6,8 +6,6 @@
 #ifndef LOCKGUARD_HPP
 #define LOCKGUARD_HPP
 
-#include "os_def.hpp"
-
 #include "FreeRTOS.h"
 #include "portmacro.h"
 #include "semphr.h"
@@ -15,6 +13,9 @@
 #include <cassert>
 
 namespace jungles
+{
+
+namespace freertos
 {
 
 //! Implements RAII for semaphore/mutex locking.
@@ -30,17 +31,19 @@ class lockguard
     //! The mutex must be created before this constructor is used.
     lockguard(LockableObjectHandle o) noexcept : lockable{o}
     {
-        assert(xSemaphoreTake(lockable, portMAX_DELAY));
+        xSemaphoreTake(lockable, portMAX_DELAY);
     }
 
     ~lockguard()
     {
-        assert(xSemaphoreGive(lockable));
+        xSemaphoreGive(lockable);
     }
 
   private:
     LockableObjectHandle lockable;
 };
+
+} // namespace freertos
 
 } // namespace jungles
 

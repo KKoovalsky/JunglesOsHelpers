@@ -1,10 +1,10 @@
 /**
- * @file	flag_impl.hpp
- * @brief	Implements a thread-safe flaig which is settable, resettable and waitable.
+ * @file	flag.hpp
+ * @brief	Implements a thread-safe flag which is settable, resettable and waitable.
  * @author	Kacper Kowalski - kacper.kowalski@hum-systems.com
  */
-#ifndef FLAG_IMPL_HPP
-#define FLAG_IMPL_HPP
+#ifndef FREERTOS_FLAG_HPP
+#define FREERTOS_FLAG_HPP
 
 #include "flag.hpp"
 
@@ -14,29 +14,32 @@
 namespace jungles
 {
 
-class flag_impl : public flag
+namespace freertos
+{
+
+class flag
 {
   public:
-    flag_impl() : event_group_handle{xEventGroupCreate()}
+    flag() : event_group_handle{xEventGroupCreate()}
     {
     }
 
-    ~flag_impl()
+    ~flag()
     {
         vEventGroupDelete(event_group_handle);
     }
 
-    virtual void set() override
+    void set()
     {
         xEventGroupSetBits(event_group_handle, event_bit);
     }
 
-    virtual void reset() override
+    void reset()
     {
         xEventGroupClearBits(event_group_handle, event_bit);
     }
 
-    virtual void wait() override
+    void wait()
     {
         auto do_not_clear_on_exit{pdFALSE};
         // Doesn't matter since we are waiting for a single bit.
@@ -46,7 +49,7 @@ class flag_impl : public flag
         xEventGroupWaitBits(event_group_handle, event_bit, do_not_clear_on_exit, wait_for_all_bits, wait_undefinitely);
     }
 
-    virtual bool is_set() const override
+    bool is_set() const
     {
         auto current_event_bits{xEventGroupGetBits(event_group_handle)};
         return current_event_bits == event_bit;
@@ -57,6 +60,7 @@ class flag_impl : public flag
     static constexpr EventBits_t event_bit{0x01};
 };
 
+} // namespace freertos
 } // namespace jungles
 
-#endif /* FLAG_IMPL_HPP */
+#endif /* FREERTOS_FLAG_HPP */
