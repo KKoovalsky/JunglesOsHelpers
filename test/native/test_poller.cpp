@@ -6,9 +6,9 @@
  */
 #include "catch2/catch.hpp"
 
-#include "poller.hpp"
+#include "jungles_os_helpers/generic_implementations/poller.hpp"
 
-using namespace jungles;
+using namespace jungles::generic;
 
 TEST_CASE("Poller polls a predicate", "[poller]")
 {
@@ -19,7 +19,7 @@ TEST_CASE("Poller polls a predicate", "[poller]")
         };
     }};
 
-    SECTION("Asker finishes immediately after predicate returns true on the first polling")
+    SECTION("Poller finishes immediately after predicate returns true on the first polling")
     {
         poller<10, 100> a{[](auto) {
         }};
@@ -27,7 +27,7 @@ TEST_CASE("Poller polls a predicate", "[poller]")
         REQUIRE(result == true);
     }
 
-    SECTION("Asker finishes immediately after predicate returns true NOT on the first polling")
+    SECTION("Poller finishes immediately after predicate returns true NOT on the first polling")
     {
         poller<10, 100> a{[&](auto) {
         }};
@@ -79,7 +79,7 @@ TEST_CASE("Poller polls a predicate", "[poller]")
         REQUIRE(actual_delay == 33);
     }
 
-    SECTION("Asker fails when timeout occurs")
+    SECTION("Poller fails when timeout occurs")
     {
         SECTION("When the timeout is a multiply of the interval")
         {
