@@ -14,6 +14,7 @@
 #include <cassert>
 #include <functional>
 #include <memory>
+#include <string>
 #include <string_view>
 
 namespace jungles
@@ -103,6 +104,7 @@ class thread
                                     priority,
                                     nullptr)};
             assert(result == pdPASS);
+            (void) result;
         }
 
         void notify_task_finished()
