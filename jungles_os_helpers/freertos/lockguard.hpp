@@ -7,7 +7,6 @@
 #define LOCKGUARD_HPP
 
 #include "FreeRTOS.h"
-#include "portmacro.h"
 #include "semphr.h"
 
 #include <cassert>
