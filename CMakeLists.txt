@@ -9,7 +9,7 @@ macro(CreateMainTarget)
     add_library(JunglesOsHelpers INTERFACE)
     target_include_directories(JunglesOsHelpers INTERFACE ${CMAKE_CURRENT_LIST_DIR})
     target_compile_features(JunglesOsHelpers INTERFACE cxx_std_17)
-    target_compile_options(JunglesOsHelpers INTERFACE -Wall -Wextra)
+    add_library(jungles::os_helpers ALIAS JunglesOsHelpers)
 endmacro()
 
 
