@@ -22,7 +22,7 @@ FetchContent_Declare(JunglesOsHelpersLib
     GIT_TAG master
 )
 
-# Will create an INTERFACE library target called "JunglesOsHelpers"
+# Will create an INTERFACE library target called "JunglesOsHelpers" and it's alias jungles::os_helpers.
 FetchContent_MakeAvailable(JunglesOsHelpersLib)
 
 ```
