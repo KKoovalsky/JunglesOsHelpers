@@ -14,9 +14,9 @@
 #include "lockguard.hpp"
 
 #include <array>
-#include <boost/container/static_vector.hpp>
 #include <exception>
 #include <optional>
+#include <vector>
 
 namespace jungles
 {
@@ -39,6 +39,7 @@ class queue
         queue_depot_mux{xSemaphoreCreateMutexStatic(&queue_depot_mux_storage)},
         num_elements_counting_sem{xSemaphoreCreateCountingStatic(Size, 0, &num_elements_counting_sem_storage)}
     {
+        queue_depot.reserve(Size);
         assert(queue_depot_mux != nullptr);
         assert(num_elements_counting_sem != nullptr);
     }
@@ -121,7 +122,7 @@ class queue
     }
 
     //! @todo Shall be circular buffer.
-    boost::container::static_vector<ElementType, Size> queue_depot;
+    std::vector<ElementType> queue_depot;
     unsigned queue_depot_tail{0}, queue_depot_head{0}, queue_depot_elem_count{0};
     SemaphoreHandle_t queue_depot_mux;
     SemaphoreHandle_t num_elements_counting_sem;
