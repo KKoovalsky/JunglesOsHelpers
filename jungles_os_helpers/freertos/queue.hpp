@@ -16,6 +16,7 @@
 #include <array>
 #include <boost/container/static_vector.hpp>
 #include <exception>
+#include <optional>
 
 namespace jungles
 {
