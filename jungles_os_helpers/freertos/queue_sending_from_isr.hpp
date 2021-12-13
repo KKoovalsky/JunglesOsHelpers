@@ -23,7 +23,7 @@ namespace freertos
  *
  */
 template<typename ElementType, std::size_t Size>
-class queue_sending_from_isr : jungles::freertos::queue<ElementType, Size>
+class queue_sending_from_isr : public jungles::freertos::queue<ElementType, Size>
 {
   public:
     void send(ElementType&& elem)
