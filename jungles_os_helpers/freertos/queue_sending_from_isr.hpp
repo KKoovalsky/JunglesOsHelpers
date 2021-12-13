@@ -28,10 +28,8 @@ class queue_sending_from_isr : public jungles::freertos::queue<ElementType, Size
   public:
     void send(ElementType&& elem)
     {
-        insert(std::move(elem));
-
-        auto r{xSemaphoreGiveFromISR(num_elements_counting_sem)};
-        assert(r == pdTRUE);
+        using BaseQueue = jungles::freertos::queue<ElementType, Size>;
+        BaseQueue::send_from_isr(std::move(elem));
     }
 };
 

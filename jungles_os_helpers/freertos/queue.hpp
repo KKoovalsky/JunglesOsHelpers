@@ -59,6 +59,17 @@ class queue
         assert(r == pdTRUE);
     }
 
+    void send_from_isr(ElementType&& elem)
+    {
+        insert(std::move(elem));
+
+        BaseType_t higher_priority_task_woken{pdFALSE};
+        [[maybe_unused]] auto r{xSemaphoreGiveFromISR(num_elements_counting_sem, &higher_priority_task_woken)};
+        assert(r == pdTRUE);
+
+        portYIELD_FROM_ISR(higher_priority_task_woken);
+    }
+
     ElementType receive()
     {
         return *receive_impl(portMAX_DELAY);
@@ -77,7 +88,7 @@ class queue
     {
     };
 
-  protected:
+  private:
     void insert(ElementType&& elem)
     {
         bool is_full{false};
@@ -96,7 +107,6 @@ class queue
             throw queue_full_error{};
     }
 
-  private:
     void increment_circular_buffer_index(unsigned& index)
     {
         index = (index + 1) % Size;
