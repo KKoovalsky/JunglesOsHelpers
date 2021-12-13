@@ -78,7 +78,7 @@ macro(CreateNativeHelpersTests)
     target_compile_features(native_helpers_tests PRIVATE cxx_std_17)
     target_compile_options(native_helpers_tests PRIVATE -Wall -Wextra)
     target_link_libraries(native_helpers_tests PRIVATE JunglesOsHelpers)
-    add_test(NAME native_helpers COMMAND valgrind --leak-check=full ./native_helpers_tests)
+    add_test(NAME native_helpers COMMAND valgrind --leak-check=full $<TARGET_FILE:native_helpers_tests>)
 endmacro()
 
 
