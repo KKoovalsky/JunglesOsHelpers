@@ -24,6 +24,7 @@ namespace jungles
 namespace freertos
 {
 
+// TODO: Templated Size is uneeded here.
 template<typename ElementType, std::size_t Size>
 class queue
 {
