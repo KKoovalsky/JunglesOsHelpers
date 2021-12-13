@@ -51,26 +51,10 @@ class queue
 
     void send(ElementType&& elem)
     {
-        bool is_full{false};
-        {
-            lockguard g(queue_depot_mux);
-            is_full = queue_depot_elem_count == Size;
-            if (!is_full)
-            {
-                queue_depot.insert(iterator_from_index(queue_depot_head), std::move(elem));
-                increment_circular_buffer_index(queue_depot_head);
-                ++queue_depot_elem_count;
-            }
-        }
+        insert(std::move(elem));
 
-        if (!is_full)
-        {
-            auto r{xSemaphoreGive(num_elements_counting_sem)};
-            assert(r == pdTRUE);
-        } else
-        {
-            throw queue_full_error{};
-        }
+        auto r{xSemaphoreGive(num_elements_counting_sem)};
+        assert(r == pdTRUE);
     }
 
     ElementType receive()
@@ -90,6 +74,25 @@ class queue
     struct queue_full_error : public error
     {
     };
+
+  protected:
+    void insert(ElementType&& elem)
+    {
+        bool is_full{false};
+        {
+            lockguard g(queue_depot_mux);
+            is_full = queue_depot_elem_count == Size;
+            if (!is_full)
+            {
+                queue_depot.insert(iterator_from_index(queue_depot_head), std::move(elem));
+                increment_circular_buffer_index(queue_depot_head);
+                ++queue_depot_elem_count;
+            }
+        }
+
+        if (is_full)
+            throw queue_full_error{};
+    }
 
   private:
     void increment_circular_buffer_index(unsigned& index)
