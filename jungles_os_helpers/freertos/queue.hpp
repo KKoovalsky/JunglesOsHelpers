@@ -61,7 +61,7 @@ class queue
 
     void send_from_isr(ElementType&& elem)
     {
-        insert(std::move(elem));
+        insert_lock_free(std::move(elem));
 
         BaseType_t higher_priority_task_woken{pdFALSE};
         [[maybe_unused]] auto r{xSemaphoreGiveFromISR(num_elements_counting_sem, &higher_priority_task_woken)};
@@ -91,20 +91,19 @@ class queue
   private:
     void insert(ElementType&& elem)
     {
-        bool is_full{false};
-        {
-            lockguard g(queue_depot_mux);
-            is_full = queue_depot_elem_count == Size;
-            if (!is_full)
-            {
-                queue_depot.insert(iterator_from_index(queue_depot_head), std::move(elem));
-                increment_circular_buffer_index(queue_depot_head);
-                ++queue_depot_elem_count;
-            }
-        }
+        lockguard g(queue_depot_mux);
+        insert_lock_free(std::move(elem));
+    }
 
+    void insert_lock_free(ElementType&& elem)
+    {
+        auto is_full{queue_depot_elem_count == Size};
         if (is_full)
             throw queue_full_error{};
+
+        queue_depot.insert(iterator_from_index(queue_depot_head), std::move(elem));
+        increment_circular_buffer_index(queue_depot_head);
+        ++queue_depot_elem_count;
     }
 
     void increment_circular_buffer_index(unsigned& index)
