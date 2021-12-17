@@ -60,13 +60,23 @@ class queue
 
     void send_from_isr(ElementType&& elem)
     {
-        insert_lock_free(std::move(elem));
+        BaseType_t higher_priority_task_woken1{pdFALSE}, higher_priority_task_woken2{pdFALSE},
+            higher_priority_task_woken3{pdFALSE};
 
-        BaseType_t higher_priority_task_woken{pdFALSE};
-        [[maybe_unused]] auto r{xSemaphoreGiveFromISR(num_elements_counting_sem, &higher_priority_task_woken)};
-        assert(r == pdTRUE);
+        bool is_queue_depot_accessible{xSemaphoreTakeFromISR(queue_depot_mux, &higher_priority_task_woken1) == pdTRUE};
+        if (is_queue_depot_accessible)
+        {
+            insert_lock_free(std::move(elem));
+            xSemaphoreGiveFromISR(queue_depot_mux, &higher_priority_task_woken2);
+        }
 
-        portYIELD_FROM_ISR(higher_priority_task_woken);
+        if (is_queue_depot_accessible)
+        {
+            [[maybe_unused]] auto r{xSemaphoreGiveFromISR(num_elements_counting_sem, &higher_priority_task_woken3)};
+            assert(r == pdTRUE);
+        }
+
+        portYIELD_FROM_ISR(higher_priority_task_woken1 or higher_priority_task_woken2 or higher_priority_task_woken3);
     }
 
     ElementType receive()
