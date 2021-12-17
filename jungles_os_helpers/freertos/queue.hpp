@@ -40,7 +40,6 @@ class queue
         queue_depot_mux{xSemaphoreCreateMutexStatic(&queue_depot_mux_storage)},
         num_elements_counting_sem{xSemaphoreCreateCountingStatic(Size, 0, &num_elements_counting_sem_storage)}
     {
-        queue_depot.reserve(Size);
         assert(queue_depot_mux != nullptr);
         assert(num_elements_counting_sem != nullptr);
     }
@@ -101,7 +100,7 @@ class queue
         if (is_full)
             throw queue_full_error{};
 
-        queue_depot.insert(iterator_from_index(queue_depot_head), std::move(elem));
+        queue_depot[queue_depot_head] = std::move(elem);
         increment_circular_buffer_index(queue_depot_head);
         ++queue_depot_elem_count;
     }
@@ -109,11 +108,6 @@ class queue
     void increment_circular_buffer_index(unsigned& index)
     {
         index = (index + 1) % Size;
-    }
-
-    auto iterator_from_index(unsigned index)
-    {
-        return std::next(std::begin(queue_depot), index);
     }
 
     std::optional<ElementType> receive_impl(TickType_t timeout)
@@ -132,7 +126,7 @@ class queue
     }
 
     //! @todo Shall be circular buffer.
-    std::vector<ElementType> queue_depot;
+    std::array<ElementType, Size> queue_depot;
     unsigned queue_depot_tail{0}, queue_depot_head{0}, queue_depot_elem_count{0};
     SemaphoreHandle_t queue_depot_mux;
     SemaphoreHandle_t num_elements_counting_sem;
