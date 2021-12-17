@@ -56,6 +56,7 @@ struct message
 {
     std::function<void(void)> callback;
 
+    message() = default;
     explicit message(std::function<void(void)> callback) : callback{callback} {}
 };
 
