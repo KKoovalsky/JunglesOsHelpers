@@ -16,7 +16,7 @@
 #include <array>
 #include <exception>
 #include <optional>
-#include <vector>
+#include <type_traits>
 
 namespace jungles
 {
@@ -24,8 +24,8 @@ namespace jungles
 namespace freertos
 {
 
-// TODO: Templated Size is uneeded here.
 template<typename ElementType, std::size_t Size>
+requires std::is_default_constructible_v<ElementType>
 class queue
 {
   public:

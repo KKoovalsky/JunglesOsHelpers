@@ -22,6 +22,10 @@ project(JunglesOsHelpers)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
+
 CreateMainTarget()
 
 set(JUNGLES_OS_HELPERS_ENABLE_TESTING OFF CACHE BOOL "Enables self-testing of the library")
