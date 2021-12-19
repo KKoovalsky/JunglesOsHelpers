@@ -40,6 +40,7 @@ class thread
 
     void start(ThreadCode thread_code)
     {
+        is_started = true;
         thread_owner_shared_pointer->start(std::move(thread_code));
     }
 
@@ -49,6 +50,8 @@ class thread
             throw already_detached_error{};
         else if (is_joined)
             return;
+        else if (!is_started)
+            throw not_started_error{};
 
         thread_owner_shared_pointer->wait_task_finished();
 
@@ -57,14 +60,19 @@ class thread
 
     void detach()
     {
-        throw_if_joined_or_detached_already();
+        if (is_detached)
+            throw already_detached_error{};
+        else if (is_joined)
+            throw already_joined_error{};
+        else if (!is_started)
+            throw not_started_error{};
 
         is_detached = true;
     }
 
     ~thread()
     {
-        if (is_detached)
+        if (is_detached or !is_started)
             return;
         join();
     }
@@ -78,6 +86,10 @@ class thread
     };
 
     struct already_joined_error : public error
+    {
+    };
+
+    struct not_started_error : public error
     {
     };
 
@@ -156,17 +168,10 @@ class thread
         ThreadCode thread_code;
     };
 
-    void throw_if_joined_or_detached_already()
-    {
-        if (is_detached)
-            throw already_detached_error{};
-        else if (is_joined)
-            throw already_joined_error{};
-    }
-
     std::shared_ptr<thread_owner> thread_owner_shared_pointer;
     bool is_detached{false};
     bool is_joined{false};
+    bool is_started{false};
 };
 
 } // namespace freertos

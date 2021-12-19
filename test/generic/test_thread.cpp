@@ -110,4 +110,9 @@ TEST_CASE("Thread is able to run a task", "[thread]")
         t.join();
         REQUIRE_NOTHROW(t.join());
     }
+
+    SECTION("Not started thread is destructed correctly")
+    {
+        get_thread_for_test_run();
+    }
 }
