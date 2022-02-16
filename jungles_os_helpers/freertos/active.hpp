@@ -8,7 +8,7 @@
 
 #include "jungles_os_helpers/freertos/queue.hpp"
 #include "jungles_os_helpers/freertos/thread.hpp"
-#include "jungles_os_helpers/generic_implementations/active.hpp"
+#include "jungles_os_helpers/generic/active.hpp"
 
 namespace jungles
 {

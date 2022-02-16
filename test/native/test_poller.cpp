@@ -6,7 +6,7 @@
  */
 #include "catch2/catch.hpp"
 
-#include "jungles_os_helpers/generic_implementations/poller.hpp"
+#include "jungles_os_helpers/generic/poller.hpp"
 
 using namespace jungles::generic;
 

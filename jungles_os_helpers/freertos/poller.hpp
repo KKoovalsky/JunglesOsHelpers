@@ -6,7 +6,7 @@
 #ifndef FREERTOS_POLLER_HPP
 #define FREERTOS_POLLER_HPP
 
-#include "jungles_os_helpers/generic_implementations/poller.hpp"
+#include "jungles_os_helpers/generic/poller.hpp"
 
 #include "FreeRTOS.h"
 #include "task.h"

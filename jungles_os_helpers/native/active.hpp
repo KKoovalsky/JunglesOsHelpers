@@ -6,7 +6,7 @@
 #ifndef JUNGLES_NATIVE_ACTIVE_HPP
 #define JUNGLES_NATIVE_ACTIVE_HPP
 
-#include "jungles_os_helpers/generic_implementations/active.hpp"
+#include "jungles_os_helpers/generic/active.hpp"
 #include "jungles_os_helpers/native/message_pump.hpp"
 #include "jungles_os_helpers/native/thread.hpp"
 
