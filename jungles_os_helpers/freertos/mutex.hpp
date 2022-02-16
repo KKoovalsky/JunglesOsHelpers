@@ -32,6 +32,11 @@ class mutex
         xSemaphoreGive(mux);
     }
 
+    bool try_lock()
+    {
+        return xSemaphoreTake(mux, 0) == pdTRUE;
+    }
+
     ~mutex()
     {
         vSemaphoreDelete(mux);

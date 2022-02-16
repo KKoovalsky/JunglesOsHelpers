@@ -71,6 +71,7 @@ macro(CreateNativeHelpersTests)
     add_executable(native_helpers_tests
         ${native_tests_dir}/test_poller.cpp
         ${generic_tests_dir}/test_active.cpp
+        ${generic_tests_dir}/test_lockable.cpp
     )
     target_include_directories(native_helpers_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${native_tests_dir})
     target_link_libraries(native_helpers_tests PRIVATE Catch2::Catch2WithMain Threads::Threads)
