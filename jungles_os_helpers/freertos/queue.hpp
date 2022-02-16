@@ -53,7 +53,7 @@ requires std::is_default_constructible_v<ElementType> class queue
     {
         insert(std::move(elem));
 
-        auto r{xSemaphoreGive(num_elements_counting_sem)};
+        [[maybe_unused]] auto r{xSemaphoreGive(num_elements_counting_sem)};
         assert(r == pdTRUE);
     }
 
