@@ -4,7 +4,7 @@
  * @brief Tests whether the poller finishes when timeout occurs or when predicate returns true.
  * @date 2020-07-31
  */
-#include "catch2/catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 #include "jungles_os_helpers/generic/poller.hpp"
 

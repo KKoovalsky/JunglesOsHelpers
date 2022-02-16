@@ -3,7 +3,7 @@
  * @brief	Generic test for an Active object.
  * @author	Kacper Kowalski - kacper.s.kowalski@gmail.com
  */
-#include "catch2/catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "test/test_helpers.hpp"
 
 #include "active_under_test_definition.hpp"

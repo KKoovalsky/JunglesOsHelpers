@@ -3,7 +3,7 @@
  * @brief	Tests the flag implementation.
  * @author	Kacper Kowalski - kacper.s.kowalski@gmail.com
  */
-#include "catch2/catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 #include <thread>
 

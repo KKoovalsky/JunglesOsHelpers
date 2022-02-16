@@ -3,7 +3,7 @@
  * @brief	Generic test of queue with pluggable queue implementation to be tested.
  * @author	Kacper Kowalski - kacper.s.kowalski@gmail.com
  */
-#include "catch2/catch.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 #include <future>
 #include <iostream>

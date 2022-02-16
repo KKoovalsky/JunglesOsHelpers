@@ -44,7 +44,7 @@ macro(DownloadAndPopulateCatch2)
     FetchContent_Declare(
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG 0fa133a0c5e065065ef96ac2b6c0284cf5da265d
+        GIT_TAG 7cf2f88e50f0d1de324489c31db0314188423b6d
     )
     FetchContent_MakeAvailable(Catch2)
 endmacro()
@@ -69,12 +69,11 @@ endmacro()
 
 macro(CreateNativeHelpersTests)
     add_executable(native_helpers_tests
-        ${native_tests_dir}/main.cpp
         ${native_tests_dir}/test_poller.cpp
         ${generic_tests_dir}/test_active.cpp
     )
     target_include_directories(native_helpers_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${native_tests_dir})
-    target_link_libraries(native_helpers_tests PRIVATE Catch2::Catch2 Threads::Threads)
+    target_link_libraries(native_helpers_tests PRIVATE Catch2::Catch2WithMain Threads::Threads)
     target_compile_features(native_helpers_tests PRIVATE cxx_std_17)
     target_compile_options(native_helpers_tests PRIVATE -Wall -Wextra)
     target_link_libraries(native_helpers_tests PRIVATE JunglesOsHelpers)

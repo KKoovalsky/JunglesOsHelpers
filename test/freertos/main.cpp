@@ -3,8 +3,7 @@
  * @brief	Generates main for Catch and defines common setup for the tests.
  * @author	Kacper Kowalski - kacper.s.kowalski@gmail.com
  */
-#define CATCH_CONFIG_RUNNER
-#include "catch2/catch.hpp"
+#include "catch2/catch_session.hpp"
 
 #include <algorithm>
 #include <iostream>
