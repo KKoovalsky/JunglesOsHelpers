@@ -6,6 +6,7 @@
 #ifndef FLAG_HPP
 #define FLAG_HPP
 
+#include <chrono>
 #include <condition_variable>
 #include <mutex>
 
@@ -26,6 +27,13 @@ class flag
     {
         std::unique_lock lk{mux};
         cv.wait(lk, [this]() { return flag; });
+    }
+
+    template<class Rep, class Period>
+    bool wait_for(const std::chrono::duration<Rep, Period>& duration)
+    {
+        std::unique_lock lk{mux};
+        return cv.wait_for(lk, duration, [this]() { return flag; });
     }
 
   private:
