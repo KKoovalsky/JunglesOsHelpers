@@ -1,5 +1,5 @@
 /**
- * @file	freertos_poller.hpp
+ * @file	poller.hpp
  * @brief	Defines aliases for a FreeRTOS based poller.
  * @author	Kacper Kowalski - kacper.s.kowalski@gmail.com
  */
