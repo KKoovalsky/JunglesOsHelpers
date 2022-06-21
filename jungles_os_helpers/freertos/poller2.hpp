@@ -17,7 +17,7 @@ namespace jungles
 namespace freertos
 {
 
-static inline constexpr void delay(DelayMilliseconds delay_ms)
+static inline void delay(DelayMilliseconds delay_ms)
 {
     vTaskDelay(pdMS_TO_TICKS(delay_ms.value));
 }
