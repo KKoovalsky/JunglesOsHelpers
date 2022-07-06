@@ -10,6 +10,7 @@
 
 #include "FreeRTOS.h"
 #include "event_groups.h"
+#include "projdefs.h"
 
 namespace jungles
 {
@@ -47,6 +48,17 @@ class flag
         auto wait_undefinitely{portMAX_DELAY};
 
         xEventGroupWaitBits(event_group_handle, event_bit, do_not_clear_on_exit, wait_for_all_bits, wait_undefinitely);
+    }
+
+    bool wait_for(unsigned milliseconds)
+    {
+        auto do_not_clear_on_exit{pdFALSE};
+        // Doesn't matter since we are waiting for a single bit.
+        auto wait_for_all_bits{pdTRUE};
+
+        auto r{xEventGroupWaitBits(
+            event_group_handle, event_bit, do_not_clear_on_exit, wait_for_all_bits, pdMS_TO_TICKS(milliseconds))};
+        return r != 0;
     }
 
     bool is_set() const
