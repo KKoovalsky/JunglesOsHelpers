@@ -39,7 +39,7 @@ class flag
   private:
     std::mutex mux;
     std::condition_variable cv;
-    bool flag;
+    bool flag{false};
 };
 
 } // namespace jungles
