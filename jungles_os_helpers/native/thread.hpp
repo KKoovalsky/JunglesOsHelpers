@@ -7,6 +7,7 @@
 #define JUNGLES_NATIVE_THREAD_HPP
 
 #include <thread>
+#include <functional>
 
 namespace jungles
 {
