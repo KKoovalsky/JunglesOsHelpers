@@ -46,7 +46,7 @@ class thread2
     void start(Owner* owner)
     {
         underlying_thread = std::thread{[&]() {
-            (owner->*Func)();
+            (owner->*MethodPointer)();
         }};
     }
 
