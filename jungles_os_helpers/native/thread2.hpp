@@ -41,7 +41,7 @@ requires detail::Method<decltype(MethodPointer)>
 class thread2
 {
   public:
-    using Owner = typename ClassOf<decltype(MethodPointer)>::type;
+    using Owner = typename detail::ClassOf<decltype(MethodPointer)>::type;
 
     void start(Owner* owner)
     {
