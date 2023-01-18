@@ -31,7 +31,7 @@ class message_pump
     {
         std::unique_lock ul{mux};
         cv.wait(ul, [this]() { return !queue.empty(); });
-        return pop()
+        return pop();
     }
 
     std::optional<Message> receive_immediate()
