@@ -8,10 +8,7 @@
 
 #include <thread>
 
-namespace jungles
-{
-
-namespace native
+namespace jungles::native
 {
 
 namespace detail
@@ -45,7 +42,7 @@ class thread2
 
     void start(Owner* owner)
     {
-        underlying_thread = std::thread{[&]() {
+        underlying_thread = std::thread{[=]() {
             (owner->*MethodPointer)();
         }};
     }
@@ -59,8 +56,6 @@ class thread2
     std::thread underlying_thread;
 };
 
-} // namespace native
-
-} // namespace jungles
+} // namespace jungles::native
 
 #endif /* JUNGLES_NATIVE_THREAD2_HPP */
