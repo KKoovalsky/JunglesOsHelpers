@@ -10,8 +10,7 @@ namespace test_helpers
 
 enum class Event
 {
-    e0 = 0,
-    e1,
+    e1 = 0,
     e2,
     e3,
     e4,

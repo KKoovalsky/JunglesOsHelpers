@@ -5,9 +5,11 @@
 
 #include "jungles_os_helpers/freertos/event_group.hpp"
 
+#include <memory>
+
 #include "FreeRTOS.h"
 #include "event_groups.h"
-#include <memory>
+#include "portmacro.h"
 
 namespace jungles::freertos
 {
@@ -36,7 +38,25 @@ struct event_group_impl
         return xEventGroupGetBits(handle);
     }
 
+    Bits wait_one(Bits bits)
+    {
+        return do_wait_one(bits);
+    }
+
+    void clear(Bits bits)
+    {
+        xEventGroupClearBits(handle, bits);
+    }
+
   private:
+    Bits do_wait_one(Bits bits, TickType_t delay = portMAX_DELAY)
+    {
+        auto do_not_clear_on_exit{pdFALSE};
+        auto do_not_wait_for_all{pdFALSE};
+        auto bit{xEventGroupWaitBits(handle, bits, do_not_clear_on_exit, do_not_wait_for_all, delay)};
+        return bit;
+    }
+
     EventGroupHandle_t handle;
 };
 
@@ -56,6 +76,16 @@ void event_group::set(Bits bits)
 Bits event_group::get()
 {
     return pimpl->get();
+}
+
+Bits event_group::wait_one(Bits bits)
+{
+    return pimpl->wait_one(bits);
+}
+
+void event_group::clear(Bits bits)
+{
+    return pimpl->clear(bits);
 }
 
 } // namespace impl

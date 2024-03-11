@@ -23,17 +23,40 @@ struct event_group
 {
     event_group();
     ~event_group();
-    void set(Bits bits);
+
+    void set(Bits);
     Bits get();
+    Bits wait_one(Bits);
+    void clear(Bits);
 
   private:
     std::unique_ptr<event_group_impl> pimpl;
 };
 
 }; // namespace impl
+
+namespace detail
+{
+
+static inline constexpr unsigned bit_position(unsigned val)
+{
+    // Assume 'val' is always positive and power of two
+    unsigned position{0};
+    while ((val & (1 << position)) == 0)
+        position++;
+
+    return position;
+}
+
+}; // namespace detail
+
 template<auto... Events>
 struct event_group
 {
+  private:
+    using EnumToBits = utils::EnumToBits<Bits, Events...>;
+    using EnumType = typename EnumToBits::value_type;
+
   public:
     template<typename... E>
     void set(E... events)
@@ -45,6 +68,22 @@ struct event_group
     Bits get()
     {
         return pimpl.get();
+    }
+
+    template<typename... E>
+    EnumType wait_one(E... events)
+    {
+        auto bits{enum_to_bits.to_bits(events...)};
+        auto event_bit{pimpl.wait_one(bits)};
+        pimpl.clear(event_bit);
+        return static_cast<EnumType>(detail::bit_position(event_bit));
+    }
+
+    template<typename... E>
+    void clear(E... events)
+    {
+        auto bits{enum_to_bits.to_bits(events...)};
+        pimpl.clear(bits);
     }
 
   private:

@@ -72,7 +72,8 @@ struct EnumToBits
     static_assert(MaxEnumValue <= sizeof(UnderlyingType) * 8, "The maximum enumeration value is too high");
     static_assert(MinEnumValue >= 0, "Only non-negative values are supported");
 
-  public:
+    using value_type = typename detail::first_type<decltype(Events)...>::value;
+
     template<typename... Ts>
     static inline constexpr UnderlyingType to_bits(Ts... events)
     {
