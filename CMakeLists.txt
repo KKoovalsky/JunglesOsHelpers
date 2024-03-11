@@ -10,13 +10,15 @@ macro(CreateMainTarget)
     target_include_directories(JunglesOsHelpers INTERFACE ${CMAKE_CURRENT_LIST_DIR})
     target_compile_features(JunglesOsHelpers INTERFACE cxx_std_17)
     add_library(jungles::os_helpers ALIAS JunglesOsHelpers)
+
+    add_library(JunglesOs STATIC jungles_os_helpers/freertos/src/event_group.cpp)
+    target_include_directories(JunglesOs PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 endmacro()
 
 
 ################################################################################
 # Main script
 ################################################################################
-
 
 project(JunglesOsHelpers)
 

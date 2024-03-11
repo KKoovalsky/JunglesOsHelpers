@@ -53,6 +53,7 @@ endmacro()
 macro (CreateFreeRTOSHelpersTests)
     add_executable(freertos_helpers_tests
         ${freertos_tests_dir}/main.cpp
+        ${freertos_tests_dir}/test_event_group.cpp
         ${generic_tests_dir}/test_active.cpp
         ${generic_tests_dir}/test_thread.cpp
         ${generic_tests_dir}/test_queue.cpp
@@ -62,7 +63,7 @@ macro (CreateFreeRTOSHelpersTests)
     target_link_libraries(freertos_helpers_tests PRIVATE freertos Catch2::Catch2)
     target_compile_features(freertos_helpers_tests PRIVATE cxx_std_17)
     target_compile_options(freertos_helpers_tests PRIVATE -Wall -Wextra)
-    target_link_libraries(freertos_helpers_tests PRIVATE JunglesOsHelpers)
+    target_link_libraries(freertos_helpers_tests PRIVATE JunglesOsHelpers JunglesOs)
     add_test(NAME freertos_helpers COMMAND freertos_helpers_tests)
 endmacro()
 
@@ -87,6 +88,7 @@ endmacro()
 # Main script
 ################################################################################
 
+target_link_libraries(JunglesOs PRIVATE freertos)
 
 DownloadAndPopulateCMakeHelpers()
 DownloadAndPopulateFreeRTOSKernel()
