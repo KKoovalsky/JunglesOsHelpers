@@ -60,32 +60,17 @@ template<typename UnderlyingType = unsigned, auto... Events>
 struct EnumToBits
 {
   private:
-    static inline constexpr auto MinEnumValue{std::min({Events...})};
-    static inline constexpr auto MaxEnumValue{std::max({Events...})};
+    static inline constexpr auto MinEnumValue{std::min({static_cast<int>(Events)...})};
+    static inline constexpr auto MaxEnumValue{std::max({static_cast<UnderlyingType>(Events)...})};
 
   public:
     static_assert(std::is_trivial_v<UnderlyingType>);
-    static_assert(std::is_enum_v<decltype(Events)...>, "Use 'enum' or 'enum class' to define the events");
+    static_assert((std::is_enum_v<decltype(Events)> or ...), "Use 'enum' or 'enum class' to define the events");
     static_assert(detail::are_all_same<decltype(Events)...>::value, "The enumerations must have the same type");
-    static_assert(detail::unique_values<Events...>::value <= sizeof(UnderlyingType),
+    static_assert(detail::unique_values<Events...>::value <= sizeof(UnderlyingType) * 8,
                   "Maximum of sizeof(UnderlyingType) events are supported");
-    static_assert(MaxEnumValue <= sizeof(UnderlyingType), "The maximum enumeration value is too high");
+    static_assert(MaxEnumValue <= sizeof(UnderlyingType) * 8, "The maximum enumeration value is too high");
     static_assert(MinEnumValue >= 0, "Only non-negative values are supported");
-
-  private:
-    static inline constexpr auto make_bit_values()
-    {
-        std::array evts{Events...};
-        std::array<UnderlyingType, MaxEnumValue + 1> bit_values = {};
-        for (auto e : evts)
-        {
-            auto underlying_value{static_cast<unsigned>(e)};
-            bit_values[underlying_value] = 1 << underlying_value;
-        }
-        return bit_values;
-    }
-
-    static inline constexpr std::array bit_values{make_bit_values()};
 
   public:
     template<typename... Ts>
