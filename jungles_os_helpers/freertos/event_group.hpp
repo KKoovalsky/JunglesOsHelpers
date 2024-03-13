@@ -81,6 +81,7 @@ static inline constexpr unsigned max_event_bits()
 
 }; // namespace detail
 
+//! Many-to-one event group - might have multiple producers, but only one consumer.
 template<auto... Events>
 struct event_group
 {

@@ -3,6 +3,9 @@
  * @brief       Event group tests.
  */
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_vector.hpp>
+
+#include <vector>
 
 #include "../event_enum.hpp"
 #include "jungles_os_helpers/freertos/event_group.hpp"
@@ -156,7 +159,6 @@ TEST_CASE("Event groups are awaited", "[EventGroup][EventGroupWait]")
             sync2.set();
             captured_event2 = eg.wait_one<Event::e24>();
             sync3.set();
-            is_event_set_flag.set();
         });
 
         auto tsetter{get_thread_for_test_run()};
@@ -166,6 +168,7 @@ TEST_CASE("Event groups are awaited", "[EventGroup][EventGroupWait]")
             sync2.wait_for(2000);
             eg.set<Event::e24>();
             sync3.wait_for(2000);
+            is_event_set_flag.set();
         });
 
         auto is_event_set{is_event_set_flag.wait_for(5000)};
@@ -176,4 +179,47 @@ TEST_CASE("Event groups are awaited", "[EventGroup][EventGroupWait]")
         tsetter.join();
         twaiter.join();
     }
+
+    SECTION("Gets each event one by one")
+    {
+        auto sync1{get_flag_implementation_under_test()};
+        auto sync2{get_flag_implementation_under_test()};
+        auto sync3{get_flag_implementation_under_test()};
+        auto is_event_set_flag{get_flag_implementation_under_test()};
+
+        std::vector<Event> captured_events;
+        captured_events.reserve(8);
+
+        auto twaiter{get_thread_for_test_run()};
+        twaiter.start([&]() {
+            sync1.wait_for(2000);
+            captured_events.push_back(eg.wait_one<Event::e2, Event::e23, Event::e16>());
+            captured_events.push_back(eg.wait_one<Event::e2, Event::e23, Event::e16>());
+            captured_events.push_back(eg.wait_one<Event::e2, Event::e23, Event::e16>());
+            sync2.set();
+        });
+
+        auto tsetter{get_thread_for_test_run()};
+        tsetter.start([&]() {
+            eg.set<Event::e16>();
+            eg.set<Event::e2>();
+            eg.set<Event::e23>();
+            sync1.set();
+            sync2.wait_for(2000);
+            is_event_set_flag.set();
+        });
+
+        auto is_event_set{is_event_set_flag.wait_for(3000)};
+        REQUIRE(is_event_set);
+        REQUIRE_THAT(captured_events,
+                     Catch::Matchers::UnorderedEquals(std::vector<Event>{Event::e16, Event::e2, Event::e23}));
+
+        tsetter.join();
+        twaiter.join();
+    }
+}
+
+TEST_CASE("Event groups are awaited with timeout", "[EventGroup][EventGroupWaitTimeout]")
+{
+    // REQUIRE(false);
 }

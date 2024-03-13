@@ -49,12 +49,20 @@ struct event_group_impl
     }
 
   private:
+    static inline Bits get_first_set_bit(Bits bits)
+    {
+        Bits mask{1};
+        while ((bits & mask) == 0)
+            mask <<= 1;
+        return mask;
+    }
+
     Bits do_wait_one(Bits bits, TickType_t delay = portMAX_DELAY)
     {
         auto do_not_clear_on_exit{pdFALSE};
         auto do_not_wait_for_all{pdFALSE};
-        auto bit{xEventGroupWaitBits(handle, bits, do_not_clear_on_exit, do_not_wait_for_all, delay)};
-        return bit;
+        auto bits_set{xEventGroupWaitBits(handle, bits, do_not_clear_on_exit, do_not_wait_for_all, delay)};
+        return get_first_set_bit(bits_set);
     }
 
     EventGroupHandle_t handle;
