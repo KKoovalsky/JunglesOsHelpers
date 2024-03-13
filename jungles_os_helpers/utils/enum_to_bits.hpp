@@ -78,8 +78,7 @@ struct EnumToBits
     static inline constexpr UnderlyingType to_bits(Ts... events)
     {
         static_assert(detail::are_all_same<Ts...>::value);
-        static_assert(std::is_same_v<typename detail::first_type<Ts...>::value,
-                                     typename detail::first_type<decltype(Events)...>::value>);
+        static_assert(std::is_same_v<typename detail::first_type<Ts...>::value, value_type>);
 
         std::array evts{events...};
         UnderlyingType bits{0};
@@ -90,6 +89,33 @@ struct EnumToBits
         }
 
         return bits;
+    }
+
+    template<auto... Vs>
+    static inline constexpr UnderlyingType to_bits()
+    {
+        static_assert(detail::are_all_same<decltype(Vs)...>::value);
+        static_assert(std::is_same_v<typename detail::first_type<decltype(Vs)...>::value, value_type>);
+        static_assert((is_valid<Vs>() and ...), "Invalid value provided");
+
+        UnderlyingType bits{0};
+        constexpr std::array evts{Vs...};
+        for (auto e : evts)
+        {
+            auto underlying_value{static_cast<unsigned>(e)};
+            bits |= 1 << underlying_value;
+        }
+
+        return bits;
+    }
+
+  private:
+    static inline constexpr std::array events{Events...};
+
+    template<auto V>
+    static inline constexpr bool is_valid()
+    {
+        return std::find(std::begin(events), std::end(events), V) != std::end(events);
     }
 };
 

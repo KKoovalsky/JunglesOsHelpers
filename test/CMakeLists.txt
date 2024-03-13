@@ -65,6 +65,7 @@ macro (CreateFreeRTOSHelpersTests)
     target_compile_options(freertos_helpers_tests PRIVATE -Wall -Wextra)
     target_link_libraries(freertos_helpers_tests PRIVATE JunglesOsHelpers JunglesOs)
     add_test(NAME freertos_helpers COMMAND freertos_helpers_tests)
+    set_tests_properties(freertos_helpers PROPERTIES TIMEOUT 30)
 endmacro()
 
 

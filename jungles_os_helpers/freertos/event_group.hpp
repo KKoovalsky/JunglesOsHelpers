@@ -9,6 +9,10 @@
 
 #include <memory>
 
+// Unfortunately, we need to include FreeRTOSConfig.h here to statically assert on maximum number of event bits.
+// TODO: Find a way to avoid this, because it makes the PIMPL pattern ineffective.
+#include "FreeRTOSConfig.h"
+
 namespace jungles::freertos
 {
 
@@ -48,6 +52,33 @@ static inline constexpr unsigned bit_position(unsigned val)
     return position;
 }
 
+static inline constexpr unsigned max_event_bits()
+{
+#ifdef configUSE_16_BIT_TICKS
+    if constexpr (configUSE_16_BIT_TICKS == 1)
+        return 8;
+#endif
+
+#ifdef configTICK_TYPE_WIDTH_IN_BITS
+    static_assert(configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS
+                      or configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS
+                      or configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_64_BITS,
+                  "Unsupported configTICK_TYPE_WIDTH_IN_BITS value");
+
+    if constexpr (configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_16_BITS)
+        return 8;
+    else if constexpr (configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_32_BITS)
+        return 24;
+    else if constexpr (configTICK_TYPE_WIDTH_IN_BITS == TICK_TYPE_WIDTH_64_BITS)
+        // TODO: Support max 56 events bits for 64-bit tick type (requires different UnderlyingType).
+        return 32;
+    else // Never reached
+        return 0;
+#endif
+
+    return 24;
+}
+
 }; // namespace detail
 
 template<auto... Events>
@@ -58,10 +89,12 @@ struct event_group
     using EnumType = typename EnumToBits::value_type;
 
   public:
-    template<typename... E>
-    void set(E... events)
+    static_assert(sizeof...(Events) <= detail::max_event_bits(), "Too many events for the underlying event group");
+
+    template<auto... Evts>
+    void set()
     {
-        auto bits{enum_to_bits.to_bits(events...)};
+        constexpr auto bits{enum_to_bits.template to_bits<Evts...>()};
         pimpl.set(bits);
     }
 
@@ -70,19 +103,19 @@ struct event_group
         return pimpl.get();
     }
 
-    template<typename... E>
-    EnumType wait_one(E... events)
+    template<auto... Evts>
+    EnumType wait_one()
     {
-        auto bits{enum_to_bits.to_bits(events...)};
+        constexpr auto bits{enum_to_bits.template to_bits<Evts...>()};
         auto event_bit{pimpl.wait_one(bits)};
         pimpl.clear(event_bit);
         return static_cast<EnumType>(detail::bit_position(event_bit));
     }
 
-    template<typename... E>
-    void clear(E... events)
+    template<auto... Evts>
+    void clear()
     {
-        auto bits{enum_to_bits.to_bits(events...)};
+        constexpr auto bits{enum_to_bits.template to_bits<Evts...>()};
         pimpl.clear(bits);
     }
 

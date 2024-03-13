@@ -79,6 +79,7 @@ int main(int argc, char* argv[])
 
     using program_args = std::pair<int, char**>;
     program_args arg{argc, argv};
+    TaskHandle_t handle;
     xTaskCreate(
         [](void* arg_pv) {
             auto arg_p{static_cast<program_args*>(arg_pv)};
@@ -95,7 +96,7 @@ int main(int argc, char* argv[])
         2048,
         &arg,
         1,
-        nullptr);
+        &handle);
 
     std::cout << "TEST FreeRTOS: Starting scheduler" << std::endl;
     vTaskStartScheduler();
