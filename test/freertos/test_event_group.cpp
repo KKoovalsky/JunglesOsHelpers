@@ -3,14 +3,17 @@
  * @brief       Event group tests.
  */
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <catch2/matchers/catch_matchers_vector.hpp>
 
+#include <chrono>
 #include <vector>
 
 #include "../event_enum.hpp"
 #include "jungles_os_helpers/freertos/event_group.hpp"
 
 #include "flag_under_test_definition.hpp"
+#include "platform_utils.hpp"
 #include "thread_under_test_definition.hpp"
 
 using namespace jungles::freertos;
@@ -217,9 +220,115 @@ TEST_CASE("Event groups are awaited", "[EventGroup][EventGroupWait]")
         tsetter.join();
         twaiter.join();
     }
+
+    SECTION("Gets only the awaited events")
+    {
+        auto sync1{get_flag_implementation_under_test()};
+        auto sync2{get_flag_implementation_under_test()};
+        auto sync3{get_flag_implementation_under_test()};
+        auto is_event_set_flag{get_flag_implementation_under_test()};
+
+        Event captured_event;
+        auto begin{std::chrono::high_resolution_clock::now()};
+        auto end{std::chrono::high_resolution_clock::now()};
+        bool is_event_captured_prematurely{true};
+
+        auto twaiter{get_thread_for_test_run()};
+        twaiter.start([&]() {
+            sync1.wait_for(2000);
+            begin = std::chrono::high_resolution_clock::now();
+            captured_event = eg.wait_one<Event::e2, Event::e23, Event::e16>();
+            end = std::chrono::high_resolution_clock::now();
+            sync2.set();
+        });
+
+        auto tsetter{get_thread_for_test_run()};
+        tsetter.start([&]() {
+            eg.set<Event::e9>();
+            eg.set<Event::e1>();
+            eg.set<Event::e22>();
+            sync1.set();
+            utils::delay(std::chrono::milliseconds{200});
+            is_event_captured_prematurely = sync2.is_set();
+            eg.set<Event::e23>();
+            sync2.wait_for(2000);
+            is_event_set_flag.set();
+        });
+
+        auto is_event_set{is_event_set_flag.wait_for(3000)};
+        REQUIRE(is_event_set);
+        REQUIRE(not is_event_captured_prematurely);
+
+        auto duration_ms{std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()};
+        REQUIRE(duration_ms >= 200 - 5);
+        REQUIRE(captured_event == Event::e23);
+
+        tsetter.join();
+        twaiter.join();
+    }
 }
 
 TEST_CASE("Event groups are awaited with timeout", "[EventGroup][EventGroupWaitTimeout]")
 {
-    // REQUIRE(false);
+    EventGroup32 eg;
+
+    SECTION("Simple timeout case")
+    {
+        auto sync{get_flag_implementation_under_test()};
+
+        std::optional<Event> captured_event;
+
+        auto twaiter{get_thread_for_test_run()};
+        twaiter.start([&]() {
+            captured_event = eg.wait_one<Event::e2, Event::e23, Event::e16>(std::chrono::milliseconds{10});
+            sync.set();
+        });
+
+        auto is_awaiting_done{sync.wait_for(1000)};
+        REQUIRE(is_awaiting_done);
+        REQUIRE_FALSE(captured_event.has_value());
+
+        twaiter.join();
+    }
+
+    SECTION("Events are set, but not the awaited one")
+    {
+        auto sync1{get_flag_implementation_under_test()};
+        auto sync2{get_flag_implementation_under_test()};
+        auto sync3{get_flag_implementation_under_test()};
+        auto is_event_set_flag{get_flag_implementation_under_test()};
+
+        std::optional<Event> captured_event;
+        auto begin{std::chrono::high_resolution_clock::now()};
+        auto end{std::chrono::high_resolution_clock::now()};
+
+        auto twaiter{get_thread_for_test_run()};
+        twaiter.start([&]() {
+            sync1.wait_for(2000);
+            begin = std::chrono::high_resolution_clock::now();
+            captured_event = eg.wait_one<Event::e2, Event::e23, Event::e16>(std::chrono::milliseconds{50});
+            end = std::chrono::high_resolution_clock::now();
+            sync2.set();
+        });
+
+        auto tsetter{get_thread_for_test_run()};
+        tsetter.start([&]() {
+            eg.set<Event::e9>();
+            eg.set<Event::e1>();
+            eg.set<Event::e22>();
+            sync1.set();
+            sync2.wait_for(2000);
+            is_event_set_flag.set();
+        });
+
+        auto is_event_set{is_event_set_flag.wait_for(3000)};
+        REQUIRE(is_event_set);
+        REQUIRE(not captured_event.has_value());
+
+        auto duration_ms{std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()};
+        REQUIRE_THAT(duration_ms, Catch::Matchers::WithinAbs(50, 3));
+
+        tsetter.join();
+        twaiter.join();
+    }
 }

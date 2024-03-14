@@ -5,6 +5,7 @@
 
 #include "jungles_os_helpers/freertos/event_group.hpp"
 
+#include <chrono>
 #include <memory>
 
 #include "FreeRTOS.h"
@@ -43,6 +44,12 @@ struct event_group_impl
         return do_wait_one(bits);
     }
 
+    Bits wait_one(Bits bits, std::chrono::milliseconds timeout)
+    {
+        auto ticks{pdMS_TO_TICKS(timeout.count())};
+        return do_wait_one(bits, ticks);
+    }
+
     void clear(Bits bits)
     {
         xEventGroupClearBits(handle, bits);
@@ -62,7 +69,9 @@ struct event_group_impl
         auto do_not_clear_on_exit{pdFALSE};
         auto do_not_wait_for_all{pdFALSE};
         auto bits_set{xEventGroupWaitBits(handle, bits, do_not_clear_on_exit, do_not_wait_for_all, delay)};
-        return get_first_set_bit(bits_set);
+        if (bits_set == 0 or (bits_set & bits) == 0)
+            return 0;
+        return get_first_set_bit(bits_set & bits);
     }
 
     EventGroupHandle_t handle;
@@ -89,6 +98,11 @@ Bits event_group::get()
 Bits event_group::wait_one(Bits bits)
 {
     return pimpl->wait_one(bits);
+}
+
+Bits event_group::wait_one(Bits bits, std::chrono::milliseconds timeout)
+{
+    return pimpl->wait_one(bits, timeout);
 }
 
 void event_group::clear(Bits bits)

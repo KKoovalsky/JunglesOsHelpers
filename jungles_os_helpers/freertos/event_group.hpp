@@ -7,7 +7,9 @@
 
 #include "jungles_os_helpers/utils/enum_to_bits.hpp"
 
+#include <chrono>
 #include <memory>
+#include <optional>
 
 // Unfortunately, we need to include FreeRTOSConfig.h here to statically assert on maximum number of event bits.
 // TODO: Find a way to avoid this, because it makes the PIMPL pattern ineffective.
@@ -31,6 +33,7 @@ struct event_group
     void set(Bits);
     Bits get();
     Bits wait_one(Bits);
+    Bits wait_one(Bits, std::chrono::milliseconds);
     void clear(Bits);
 
   private:
@@ -111,6 +114,21 @@ struct event_group
         auto event_bit{pimpl.wait_one(bits)};
         pimpl.clear(event_bit);
         return static_cast<EnumType>(detail::bit_position(event_bit));
+    }
+
+    template<auto... Evts>
+    std::optional<EnumType> wait_one(std::chrono::milliseconds timeout)
+    {
+        constexpr auto bits{enum_to_bits.template to_bits<Evts...>()};
+        auto event_bit{pimpl.wait_one(bits, timeout)};
+        if (event_bit != 0)
+        {
+            pimpl.clear(event_bit);
+            return static_cast<EnumType>(detail::bit_position(event_bit));
+        } else
+        {
+            return std::nullopt;
+        }
     }
 
     template<auto... Evts>
