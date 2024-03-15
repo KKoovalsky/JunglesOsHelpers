@@ -15,6 +15,7 @@ namespace jungles
 namespace generic
 {
 
+// TODO: Builder pattern for template arguments.
 template<unsigned PollingIntervalInMilliseconds, unsigned TimeoutInMilliseconds>
 class poller
 {
