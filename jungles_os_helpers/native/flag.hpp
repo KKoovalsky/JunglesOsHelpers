@@ -36,6 +36,12 @@ class flag
         return cv.wait_for(lk, duration, [this]() { return flag; });
     }
 
+    bool is_set()
+    {
+        std::lock_guard g{mux};
+        return flag;
+    }
+
   private:
     std::mutex mux;
     std::condition_variable cv;
