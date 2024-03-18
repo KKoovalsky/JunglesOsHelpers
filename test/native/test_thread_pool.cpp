@@ -154,6 +154,6 @@ TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
         auto end{std::chrono::high_resolution_clock::now()};
         auto duration_ms{std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()};
 
-        REQUIRE_THAT(duration_ms, Catch::Matchers::WithinAbs(54, 5));
+        REQUIRE_THAT(duration_ms, Catch::Matchers::WithinAbs(53, 4));
     }
 }
