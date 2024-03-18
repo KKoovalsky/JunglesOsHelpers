@@ -58,6 +58,7 @@ macro (CreateFreeRTOSHelpersTests)
         ${generic_tests_dir}/test_thread.cpp
         ${generic_tests_dir}/test_queue.cpp
         ${generic_tests_dir}/test_flag.cpp
+        generic/test_thread_pool.cpp
     )
     target_include_directories(freertos_helpers_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${freertos_tests_dir})
     target_link_libraries(freertos_helpers_tests PRIVATE freertos Catch2::Catch2)
