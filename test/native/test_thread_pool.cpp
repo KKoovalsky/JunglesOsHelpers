@@ -3,6 +3,7 @@
  * @brief       Tests the thread pool.
  */
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <chrono>
 #include <string>
@@ -18,10 +19,11 @@
 
 using namespace os::generic;
 using Flag = jungles::flag;
+using Pool = thread_pool<RunnersCount{4}, jungles::native::thread, jungles::native::message_pump, std::mutex>;
 
 TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
 {
-    thread_pool<RunnersCount{4}, jungles::native::thread, jungles::native::message_pump, std::mutex> pool;
+    Pool pool;
 
     SECTION("Executes a task")
     {
@@ -119,5 +121,39 @@ TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
             REQUIRE(is_done);
             REQUIRE(captured_string == "MAKAPAKA SZASTA FASTA");
         }
+    }
+
+    SECTION("Executes multiple tasks in parallel")
+    {
+        REQUIRE(pool.runners_count >= 4);
+
+        auto begin{std::chrono::high_resolution_clock::now()};
+        {
+            Flag flag1, flag2, flag3, flag4;
+            pool.execute([&]() {
+                utils::delay(std::chrono::milliseconds{50});
+                flag1.set();
+            });
+            pool.execute([&]() {
+                utils::delay(std::chrono::milliseconds{40});
+                flag2.set();
+            });
+            pool.execute([&]() {
+                utils::delay(std::chrono::milliseconds{30});
+                flag3.set();
+            });
+            pool.execute([&]() {
+                utils::delay(std::chrono::milliseconds{20});
+                flag4.set();
+            });
+            REQUIRE(flag1.wait_for(std::chrono::seconds{1}));
+            REQUIRE(flag2.wait_for(std::chrono::seconds{1}));
+            REQUIRE(flag3.wait_for(std::chrono::seconds{1}));
+            REQUIRE(flag4.wait_for(std::chrono::seconds{1}));
+        }
+        auto end{std::chrono::high_resolution_clock::now()};
+        auto duration_ms{std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()};
+
+        REQUIRE_THAT(duration_ms, Catch::Matchers::WithinAbs(54, 5));
     }
 }

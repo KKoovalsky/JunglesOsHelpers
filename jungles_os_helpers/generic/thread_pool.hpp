@@ -26,12 +26,10 @@ struct thread_pool
 {
     using Task = std::function<void(void)>;
 
-  private:
-    using MessagePump = Queue<Task>;
-
     static constexpr unsigned runners_count{RunnersCount_.count};
 
-  public:
+    static_assert(runners_count > 1, "Use more than 1 runners");
+
     thread_pool()
     {
         for (unsigned i = 0; i < runners_count; ++i)
@@ -66,6 +64,8 @@ struct thread_pool
     }
 
   private:
+    using MessagePump = Queue<Task>;
+
     std::array<Thread, runners_count> runners;
     std::array<MessagePump, runners_count> pumps;
     std::array<bool, runners_count> dones = {};
