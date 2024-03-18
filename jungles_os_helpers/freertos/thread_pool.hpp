@@ -18,11 +18,6 @@ namespace freertos
 
 struct ThreadPoolConfig
 {
-    constexpr ThreadPoolConfig(std::size_t runner_stack_size, unsigned runner_priority) :
-        runner_stack_size{runner_stack_size}, runner_priority{runner_priority}
-    {
-    }
-
     const std::size_t runner_stack_size;
     const std::size_t runner_priority;
 };

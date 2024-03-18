@@ -14,7 +14,7 @@ template<os::generic::RunnersCount RC>
 auto make_thread_pool()
 {
     constexpr unsigned queue_size{16};
-    constexpr freertos::ThreadPoolConfig config{2048, 1};
+    constexpr freertos::ThreadPoolConfig config{.runner_stack_size = 2048, .runner_priority = 1};
     return freertos::thread_pool<RC, queue_size, config>();
 }
 
