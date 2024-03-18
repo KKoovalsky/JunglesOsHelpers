@@ -25,7 +25,8 @@ namespace freertos
 {
 
 template<typename ElementType, std::size_t Size>
-requires std::is_default_constructible_v<ElementType> class queue
+    requires std::is_default_constructible_v<ElementType>
+class queue
 {
   public:
     static_assert(Size > 1, "This implementation will not work with size smaller than 2");
