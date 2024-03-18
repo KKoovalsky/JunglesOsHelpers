@@ -9,25 +9,18 @@
 #include <string>
 #include <thread>
 
-#include "jungles_os_helpers/generic/thread_pool.hpp"
-
-#include "jungles_os_helpers/native/flag.hpp"
-#include "jungles_os_helpers/native/message_pump.hpp"
-#include "jungles_os_helpers/native/thread.hpp"
+#include "flag_under_test_definition.hpp"
+#include "thread_pool_under_test.hpp"
 
 #include "platform_utils.hpp"
 
-using namespace os::generic;
-using Flag = jungles::flag;
-using Pool = thread_pool<RunnersCount{4}, jungles::native::thread, jungles::native::message_pump, std::mutex>;
-
 TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
 {
-    Pool pool;
+    auto pool{test::make_thread_pool<os::generic::RunnersCount{4}>()};
 
     SECTION("Executes a task")
     {
-        Flag flag;
+        auto flag{get_flag_implementation_under_test()};
         pool.execute([&flag]() { flag.set(); });
         auto is_done{flag.wait_for(std::chrono::seconds{1})};
         REQUIRE(is_done);
@@ -35,7 +28,8 @@ TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
 
     SECTION("Executes multiple tasks")
     {
-        Flag flag1, flag2, flag3;
+        auto flag1{get_flag_implementation_under_test()}, flag2{get_flag_implementation_under_test()},
+            flag3{get_flag_implementation_under_test()};
 
         pool.execute([&]() { flag1.set(); });
         pool.execute([&]() { flag2.set(); });
@@ -61,7 +55,8 @@ TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
 
         for (unsigned i = 0; i < NumRuns; ++i)
         {
-            Flag flag1, flag2, flag3;
+            auto flag1{get_flag_implementation_under_test()}, flag2{get_flag_implementation_under_test()},
+                flag3{get_flag_implementation_under_test()};
 
             pool.execute([&]() {
                 utils::delay(std::chrono::milliseconds{1});
@@ -100,7 +95,7 @@ TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
         unsigned failed_runs{0};
         for (unsigned i = 0; i < NumRuns; ++i)
         {
-            Flag flag;
+            auto flag{get_flag_implementation_under_test()};
             std::string captured_string;
 
             {
@@ -129,7 +124,9 @@ TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
 
         auto begin{std::chrono::high_resolution_clock::now()};
         {
-            Flag flag1, flag2, flag3, flag4;
+            auto flag1{get_flag_implementation_under_test()}, flag2{get_flag_implementation_under_test()},
+                flag3{get_flag_implementation_under_test()}, flag4{get_flag_implementation_under_test()};
+
             pool.execute([&]() {
                 utils::delay(std::chrono::milliseconds{50});
                 flag1.set();

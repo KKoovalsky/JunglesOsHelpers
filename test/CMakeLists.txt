@@ -73,7 +73,7 @@ macro(CreateNativeHelpersTests)
     add_executable(native_helpers_tests
         ${native_tests_dir}/test_poller.cpp
         ${native_tests_dir}/test_poller2.cpp
-        native/test_thread_pool.cpp
+        generic/test_thread_pool.cpp
         ${generic_tests_dir}/test_active.cpp
         ${generic_tests_dir}/test_lockable.cpp
     )
