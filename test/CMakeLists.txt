@@ -52,15 +52,18 @@ endmacro()
 
 macro (CreateFreeRTOSHelpersTests)
     add_executable(freertos_helpers_tests
-        ${freertos_tests_dir}/main.cpp
-        ${freertos_tests_dir}/test_event_group.cpp
-        ${generic_tests_dir}/test_active.cpp
-        ${generic_tests_dir}/test_thread.cpp
-        ${generic_tests_dir}/test_queue.cpp
-        ${generic_tests_dir}/test_flag.cpp
+        freertos/main.cpp
+        freertos/test_event_group.cpp
+        generic/test_active.cpp
+        generic/test_thread.cpp
+        generic/test_queue.cpp
+        generic/test_flag.cpp
         generic/test_thread_pool.cpp
     )
-    target_include_directories(freertos_helpers_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${freertos_tests_dir})
+    target_include_directories(freertos_helpers_tests PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/freertos
+    )
     target_link_libraries(freertos_helpers_tests PRIVATE freertos Catch2::Catch2)
     target_compile_features(freertos_helpers_tests PRIVATE cxx_std_17)
     target_compile_options(freertos_helpers_tests PRIVATE -Wall -Wextra)
@@ -72,13 +75,13 @@ endmacro()
 
 macro(CreateNativeHelpersTests)
     add_executable(native_helpers_tests
-        ${native_tests_dir}/test_poller.cpp
-        ${native_tests_dir}/test_poller2.cpp
+        native/test_poller.cpp
+        native/test_poller2.cpp
         generic/test_thread_pool.cpp
-        ${generic_tests_dir}/test_active.cpp
-        ${generic_tests_dir}/test_lockable.cpp
+        generic/test_active.cpp
+        generic/test_lockable.cpp
     )
-    target_include_directories(native_helpers_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${native_tests_dir})
+    target_include_directories(native_helpers_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/native)
     target_link_libraries(native_helpers_tests PRIVATE Catch2::Catch2WithMain Threads::Threads)
     target_compile_features(native_helpers_tests PRIVATE cxx_std_17)
     target_compile_options(native_helpers_tests PRIVATE -Wall -Wextra)
@@ -96,10 +99,6 @@ target_link_libraries(JunglesOs PRIVATE freertos)
 DownloadAndPopulateCMakeHelpers()
 DownloadAndPopulateFreeRTOSKernel()
 DownloadAndPopulateCatch2()
-
-set(generic_tests_dir ${CMAKE_CURRENT_LIST_DIR}/generic)
-set(freertos_tests_dir ${CMAKE_CURRENT_LIST_DIR}/freertos)
-set(native_tests_dir ${CMAKE_CURRENT_LIST_DIR}/native)
 
 CreateFreeRTOSHelpersTests()
 CreateNativeHelpersTests()
