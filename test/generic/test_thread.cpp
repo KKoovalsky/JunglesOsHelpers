@@ -6,10 +6,6 @@
 
 #include "catch2/catch_test_macros.hpp"
 
-#include <algorithm>
-#include <iostream>
-#include <memory>
-
 #include "../test_helpers.hpp"
 
 #include "thread_under_test_definition.hpp"

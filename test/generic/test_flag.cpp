@@ -8,11 +8,10 @@
 #include <thread>
 
 #include "flag_under_test_definition.hpp"
-#include "test/test_helpers.hpp"
 
 TEST_CASE("Flag can be set, reset and waited for", "[flag]")
 {
-    auto flag_under_test{get_flag_implementation_under_test()};
+    auto flag_under_test{test::make_flag()};
 
     SECTION("Thread blocks on wait when the flag is not set")
     {

@@ -6,7 +6,12 @@
 
 #include "jungles_os_helpers/native/flag.hpp"
 
-inline jungles::flag get_flag_implementation_under_test()
+namespace test
+{
+
+inline jungles::flag make_flag()
 {
     return jungles::flag{};
 }
+
+} // namespace test

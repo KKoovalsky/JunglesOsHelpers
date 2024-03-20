@@ -6,7 +6,12 @@
 
 #include "jungles_os_helpers/freertos/flag.hpp"
 
-inline jungles::freertos::flag get_flag_implementation_under_test()
+namespace test
+{
+
+inline jungles::freertos::flag make_flag()
 {
     return jungles::freertos::flag{};
 }
+
+} // namespace test

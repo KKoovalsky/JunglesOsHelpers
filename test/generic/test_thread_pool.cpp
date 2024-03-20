@@ -7,7 +7,6 @@
 
 #include <chrono>
 #include <string>
-#include <thread>
 
 #include "flag_under_test_definition.hpp"
 #include "thread_pool_under_test.hpp"
@@ -20,7 +19,7 @@ TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
 
     SECTION("Executes a task")
     {
-        auto flag{get_flag_implementation_under_test()};
+        auto flag{test::make_flag()};
         pool.execute([&flag]() { flag.set(); });
         auto is_done{flag.wait_for(std::chrono::seconds{1})};
         REQUIRE(is_done);
@@ -28,8 +27,7 @@ TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
 
     SECTION("Executes multiple tasks")
     {
-        auto flag1{get_flag_implementation_under_test()}, flag2{get_flag_implementation_under_test()},
-            flag3{get_flag_implementation_under_test()};
+        auto flag1{test::make_flag()}, flag2{test::make_flag()}, flag3{test::make_flag()};
 
         pool.execute([&]() { flag1.set(); });
         pool.execute([&]() { flag2.set(); });
@@ -55,8 +53,7 @@ TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
 
         for (unsigned i = 0; i < NumRuns; ++i)
         {
-            auto flag1{get_flag_implementation_under_test()}, flag2{get_flag_implementation_under_test()},
-                flag3{get_flag_implementation_under_test()};
+            auto flag1{test::make_flag()}, flag2{test::make_flag()}, flag3{test::make_flag()};
 
             pool.execute([&]() {
                 utils::delay(std::chrono::milliseconds{1});
@@ -95,7 +92,7 @@ TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
         unsigned failed_runs{0};
         for (unsigned i = 0; i < NumRuns; ++i)
         {
-            auto flag{get_flag_implementation_under_test()};
+            auto flag{test::make_flag()};
             std::string captured_string;
 
             {
@@ -124,8 +121,7 @@ TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
 
         auto begin{std::chrono::high_resolution_clock::now()};
         {
-            auto flag1{get_flag_implementation_under_test()}, flag2{get_flag_implementation_under_test()},
-                flag3{get_flag_implementation_under_test()}, flag4{get_flag_implementation_under_test()};
+            auto flag1{test::make_flag()}, flag2{test::make_flag()}, flag3{test::make_flag()}, flag4{test::make_flag()};
 
             pool.execute([&]() {
                 utils::delay(std::chrono::milliseconds{50});

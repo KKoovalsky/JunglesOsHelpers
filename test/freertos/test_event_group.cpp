@@ -119,8 +119,8 @@ TEST_CASE("Event groups are awaited", "[EventGroup][EventGroupWait]")
 
     SECTION("Waits for one event")
     {
-        auto is_thread_started_flag{get_flag_implementation_under_test()};
-        auto is_event_set_flag{get_flag_implementation_under_test()};
+        auto is_thread_started_flag{test::make_flag()};
+        auto is_event_set_flag{test::make_flag()};
 
         Event captured_event = {};
 
@@ -147,10 +147,10 @@ TEST_CASE("Event groups are awaited", "[EventGroup][EventGroupWait]")
 
     SECTION("Waits for multiple events")
     {
-        auto sync1{get_flag_implementation_under_test()};
-        auto sync2{get_flag_implementation_under_test()};
-        auto sync3{get_flag_implementation_under_test()};
-        auto is_event_set_flag{get_flag_implementation_under_test()};
+        auto sync1{test::make_flag()};
+        auto sync2{test::make_flag()};
+        auto sync3{test::make_flag()};
+        auto is_event_set_flag{test::make_flag()};
 
         Event captured_event1 = {};
         Event captured_event2 = {};
@@ -185,10 +185,10 @@ TEST_CASE("Event groups are awaited", "[EventGroup][EventGroupWait]")
 
     SECTION("Gets each event one by one")
     {
-        auto sync1{get_flag_implementation_under_test()};
-        auto sync2{get_flag_implementation_under_test()};
-        auto sync3{get_flag_implementation_under_test()};
-        auto is_event_set_flag{get_flag_implementation_under_test()};
+        auto sync1{test::make_flag()};
+        auto sync2{test::make_flag()};
+        auto sync3{test::make_flag()};
+        auto is_event_set_flag{test::make_flag()};
 
         std::vector<Event> captured_events;
         captured_events.reserve(8);
@@ -223,10 +223,10 @@ TEST_CASE("Event groups are awaited", "[EventGroup][EventGroupWait]")
 
     SECTION("Gets only the awaited events")
     {
-        auto sync1{get_flag_implementation_under_test()};
-        auto sync2{get_flag_implementation_under_test()};
-        auto sync3{get_flag_implementation_under_test()};
-        auto is_event_set_flag{get_flag_implementation_under_test()};
+        auto sync1{test::make_flag()};
+        auto sync2{test::make_flag()};
+        auto sync3{test::make_flag()};
+        auto is_event_set_flag{test::make_flag()};
 
         Event captured_event;
         auto begin{std::chrono::high_resolution_clock::now()};
@@ -274,7 +274,7 @@ TEST_CASE("Event groups are awaited with timeout", "[EventGroup][EventGroupWaitT
 
     SECTION("Simple timeout case")
     {
-        auto sync{get_flag_implementation_under_test()};
+        auto sync{test::make_flag()};
 
         std::optional<Event> captured_event;
 
@@ -293,10 +293,10 @@ TEST_CASE("Event groups are awaited with timeout", "[EventGroup][EventGroupWaitT
 
     SECTION("Events are set, but not the awaited one")
     {
-        auto sync1{get_flag_implementation_under_test()};
-        auto sync2{get_flag_implementation_under_test()};
-        auto sync3{get_flag_implementation_under_test()};
-        auto is_event_set_flag{get_flag_implementation_under_test()};
+        auto sync1{test::make_flag()};
+        auto sync2{test::make_flag()};
+        auto sync3{test::make_flag()};
+        auto is_event_set_flag{test::make_flag()};
 
         std::optional<Event> captured_event;
         auto begin{std::chrono::high_resolution_clock::now()};
