@@ -11,7 +11,7 @@ namespace test
 {
 
 template<os::generic::RunnersCount RC>
-auto make_thread_pool()
+inline auto make_thread_pool()
 {
     constexpr unsigned queue_size{16};
     constexpr freertos::ThreadPoolConfig config{.runner_stack_size = 2048, .runner_priority = 1};
