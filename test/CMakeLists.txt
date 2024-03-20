@@ -54,6 +54,7 @@ macro (CreateFreeRTOSHelpersTests)
     add_executable(freertos_helpers_tests
         freertos/main.cpp
         freertos/test_event_group.cpp
+        freertos/test_simple_thread.cpp
         generic/test_active.cpp
         generic/test_thread.cpp
         generic/test_queue.cpp
