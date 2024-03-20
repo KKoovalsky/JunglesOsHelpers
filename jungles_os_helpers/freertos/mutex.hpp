@@ -18,7 +18,7 @@ namespace freertos
 class mutex
 {
   public:
-    explicit mutex() : mux{xSemaphoreCreateMutex()}
+    mutex() : mux{xSemaphoreCreateMutex()}
     {
     }
 
