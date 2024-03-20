@@ -6,9 +6,11 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <chrono>
+#include <mutex>
 #include <string>
 
 #include "flag_under_test_definition.hpp"
+#include "mutex_under_test.hpp"
 #include "thread_pool_under_test.hpp"
 
 #include "platform_utils.hpp"
@@ -119,34 +121,56 @@ TEST_CASE("Thread pool executes tasks", "[ThreadPool]") // NOLINT
     {
         REQUIRE(pool.runners_count >= 4);
 
-        auto begin{std::chrono::high_resolution_clock::now()};
+        constexpr unsigned NumIterations{20};
+
+        std::vector<int> values;
+        values.reserve(256);
+        auto mux{test::make_mutex()};
+
         {
             auto flag1{test::make_flag()}, flag2{test::make_flag()}, flag3{test::make_flag()}, flag4{test::make_flag()};
 
+            auto push{[&values, &mux](int v) {
+                std::lock_guard g{mux};
+                values.push_back(v);
+            }};
+
+            auto pusher{[&push](int v) {
+                for (unsigned i{0}; i < NumIterations; ++i)
+                {
+                    push(v);
+                    utils::delay(std::chrono::milliseconds{1});
+                }
+            }};
+
             pool.execute([&]() {
-                utils::delay(std::chrono::milliseconds{50});
+                pusher(1);
                 flag1.set();
             });
             pool.execute([&]() {
-                utils::delay(std::chrono::milliseconds{40});
+                pusher(2);
                 flag2.set();
             });
             pool.execute([&]() {
-                utils::delay(std::chrono::milliseconds{30});
+                pusher(3);
                 flag3.set();
             });
             pool.execute([&]() {
-                utils::delay(std::chrono::milliseconds{20});
+                pusher(4);
                 flag4.set();
             });
+
             REQUIRE(flag1.wait_for(std::chrono::seconds{1}));
             REQUIRE(flag2.wait_for(std::chrono::seconds{1}));
             REQUIRE(flag3.wait_for(std::chrono::seconds{1}));
             REQUIRE(flag4.wait_for(std::chrono::seconds{1}));
         }
-        auto end{std::chrono::high_resolution_clock::now()};
-        auto duration_ms{std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()};
 
-        REQUIRE_THAT(duration_ms, Catch::Matchers::WithinAbs(53, 4));
+        std::vector<int> values_beginning(std::begin(values), std::next(std::begin(values), NumIterations));
+
+        auto b{std::begin(values_beginning)};
+        auto e{std::end(values_beginning)};
+        auto is_unique{std::equal(std::next(b), e, b)};
+        REQUIRE(not is_unique);
     }
 }
